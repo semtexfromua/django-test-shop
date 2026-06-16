@@ -1,4 +1,4 @@
-"""В'юхи каталогу."""
+"""Catalog views."""
 from decimal import Decimal, InvalidOperation
 from typing import Any, cast
 
@@ -18,12 +18,12 @@ def _parse_decimal(value: str | None) -> Decimal | None:
         result = Decimal(value)
     except (InvalidOperation, TypeError):
         return None
-    # NaN/Infinity парсяться як Decimal, але валять filter(price__gte=...) → 500.
+    # NaN/Infinity parse as Decimal but break filter(price__gte=...) → 500.
     return result if result.is_finite() else None
 
 
 class ProductListView(ListView):
-    """Каталог: активні товари з фільтрами (категорія/ціна), пошуком, сортуванням, пагінацією."""
+    """Catalog: active products with filters (category/price), search, sorting, pagination."""
 
     model = Product
     template_name = "products/product_list.html"
@@ -69,7 +69,7 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
         product = cast(Product, self.object)
-        # reverse-accessor `reviews` (з апки reviews) — без import, щоб уникнути циклу
+        # reverse accessor `reviews` (from the reviews app) — no import, to avoid a cycle
         reviews = product.reviews.select_related("user")
         ctx["reviews"] = reviews
         ctx["avg_rating"] = reviews.aggregate(avg=Avg("rating"))["avg"]

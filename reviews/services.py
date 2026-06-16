@@ -1,4 +1,4 @@
-"""Логіка прав на відгук."""
+"""Review permission logic."""
 from orders.models import Order, OrderItem
 from products.models import Product
 from users.models import User
@@ -15,7 +15,7 @@ def has_purchased(user: User, product: Product) -> bool:
 
 
 def can_review(user: User, product: Product) -> bool:
-    """Можна, якщо купив і ще не залишав відгук на цей товар."""
+    """Allowed if the user purchased the product and hasn't reviewed it yet."""
     if not has_purchased(user, product):
         return False
     return not Review.objects.filter(product=product, user=user).exists()

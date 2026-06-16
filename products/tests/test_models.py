@@ -1,4 +1,4 @@
-"""Тести моделей каталогу."""
+"""Catalog model tests."""
 from decimal import Decimal
 
 import pytest

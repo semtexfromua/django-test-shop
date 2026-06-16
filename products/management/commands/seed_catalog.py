@@ -1,4 +1,4 @@
-"""Наповнення каталогу демо-даними зі статичного шаблону Hop & Barley."""
+"""Populate the catalog with demo data from the static Hop & Barley template."""
 from decimal import Decimal
 from typing import Any
 
@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 
 from products.models import Category, Product
 
-# (назва, батько|None) — батьки перед дітьми; демонструє вкладені категорії
+# (name, parent|None) — parents before children; demonstrates nested categories
 CATEGORY_TREE: list[tuple[str, str | None]] = [
     ("Ingredients", None),
     ("Kits", None),
@@ -17,7 +17,7 @@ CATEGORY_TREE: list[tuple[str, str | None]] = [
     ("Yeast", "Ingredients"),
 ]
 
-# (name, category, price, stock, image) — image лежить у static/img/products/
+# (name, category, price, stock, image) — image lives in static/img/products/
 PRODUCTS: list[tuple[str, str, str, int, str]] = [
     ("Cascade Hops", "Hops", "4.50", 100, "cascade_hops.jpg"),
     ("Centennial Hops", "Hops", "5.00", 80, "centennial_hops.jpg"),
@@ -35,7 +35,7 @@ PRODUCTS: list[tuple[str, str, str, int, str]] = [
 
 
 class Command(BaseCommand):
-    help = "Створює демо-категорії та товари з зображеннями (ідемпотентно)."
+    help = "Create demo categories and products with images (idempotent)."
 
     def handle(self, *args: Any, **options: Any) -> None:
         cats: dict[str, Category] = {}
@@ -53,9 +53,9 @@ class Command(BaseCommand):
                     "description": f"{name} — демо-товар.",
                 },
             )
-            # картинку чіпляємо лише якщо її ще нема (ідемпотентно)
+            # attach the image only if it isn't set yet (idempotent)
             src = img_dir / image
             if not product.image and src.exists():
                 with src.open("rb") as fh:
                     product.image.save(image, File(fh), save=True)
-        self.stdout.write(self.style.SUCCESS("Каталог наповнено."))
+        self.stdout.write(self.style.SUCCESS("Catalog populated."))

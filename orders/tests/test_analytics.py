@@ -1,4 +1,4 @@
-"""Тести адмін-аналітики, скасування та ролей."""
+"""Admin analytics, cancellation and roles tests."""
 from decimal import Decimal
 from typing import cast
 
@@ -71,7 +71,7 @@ def test_cancel_order_idempotent() -> None:
     order = _order(user, Order.Status.PAID, Decimal("10"))
     OrderItem.objects.create(order=order, product=product, quantity=2, price=Decimal("5"))
     cancel_order(order)
-    cancel_order(order)  # повторне скасування не має повернути stock удруге
+    cancel_order(order)  # a repeated cancel must not restore stock twice
     product.refresh_from_db()
     assert product.stock == 3
     assert order.status == Order.Status.CANCELLED

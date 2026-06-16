@@ -1,4 +1,4 @@
-"""Реєстрація моделі User в адмінці."""
+"""Register the User model in the admin."""
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 

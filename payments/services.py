@@ -1,11 +1,11 @@
-"""Мок-обробка оплати."""
+"""Mock payment processing."""
 from orders.models import Order
 
 from .models import Payment
 
 
 def process_payment(order: Order, method: str) -> Payment:
-    """Мок: оплата завжди успішна; позначає замовлення оплаченим."""
+    """Mock: payment always succeeds; marks the order as paid."""
     payment = Payment.objects.create(
         order=order,
         method=method,

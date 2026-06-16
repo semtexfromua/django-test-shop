@@ -1,4 +1,4 @@
-"""Тести відгуків (правило «лише після покупки»)."""
+"""Review tests (the "only after purchase" rule)."""
 from decimal import Decimal
 from typing import cast
 
@@ -99,7 +99,7 @@ def test_review_create_rejects_out_of_range_rating(client: Client) -> None:
     resp = client.post(
         reverse("reviews:create", args=[product.slug]), {"rating": 99, "comment": "x"}
     )
-    assert resp.status_code == 200  # форма невалідна → перерендер
+    assert resp.status_code == 200  # form invalid → re-render
     assert Review.objects.count() == 0
 
 

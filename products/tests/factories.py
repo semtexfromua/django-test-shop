@@ -1,4 +1,4 @@
-"""factory_boy-фабрики для тестів каталогу."""
+"""factory_boy factories for catalog tests."""
 from decimal import Decimal
 
 import factory

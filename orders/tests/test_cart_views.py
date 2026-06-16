@@ -1,4 +1,4 @@
-"""Тести в'юх кошика."""
+"""Cart view tests."""
 from typing import cast
 
 import pytest

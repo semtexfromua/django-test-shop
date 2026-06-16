@@ -1,4 +1,4 @@
-"""Адмінка замовлень."""
+"""Orders admin."""
 from django.contrib import admin, messages
 from django.db.models import QuerySet
 from django.http import HttpRequest

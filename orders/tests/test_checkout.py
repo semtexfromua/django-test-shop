@@ -1,4 +1,4 @@
-"""Тести оформлення замовлення та історії."""
+"""Checkout and order-history tests."""
 from decimal import Decimal
 from typing import cast
 
@@ -57,14 +57,14 @@ def test_checkout_empty_cart_redirects(client: Client) -> None:
 
 @pytest.mark.django_db
 def test_checkout_insufficient_stock_rolls_back(client: Client) -> None:
-    """View-рівень: збій stock відкочує order+payment+stock, кошик лишається."""
+    """View level: a stock failure rolls back order+payment+stock, the cart stays."""
     from payments.models import Payment
 
     user = cast(User, UserFactory())
     client.force_login(user)
     product = cast(Product, ProductFactory(price=Decimal("10.00"), stock=1))
     session = client.session
-    session["cart"] = {str(product.pk): 5}  # більше, ніж є на складі
+    session["cart"] = {str(product.pk): 5}  # more than is in stock
     session.save()
     resp = client.post(
         reverse("orders:checkout"),
@@ -82,7 +82,7 @@ def test_checkout_insufficient_stock_rolls_back(client: Client) -> None:
     assert Payment.objects.count() == 0
     product.refresh_from_db()
     assert product.stock == 1
-    assert client.session["cart"] == {str(product.pk): 5}  # не очищено
+    assert client.session["cart"] == {str(product.pk): 5}  # not cleared
 
 
 @pytest.mark.django_db

@@ -1,4 +1,4 @@
-"""GraphQL-схема: аналітика магазину (доступ лише персоналу)."""
+"""GraphQL schema: shop analytics (staff-only access)."""
 from typing import Any
 
 import graphene

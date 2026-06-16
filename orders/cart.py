@@ -1,4 +1,4 @@
-"""Сесійний кошик для веб-інтерфейсу."""
+"""Session cart for the web UI."""
 from collections.abc import Iterator
 from decimal import Decimal
 from typing import Any
@@ -11,7 +11,7 @@ CART_SESSION_KEY = "cart"
 
 
 class Cart:
-    """Кошик, що зберігається в сесії як {product_id: quantity}."""
+    """Cart stored in the session as {product_id: quantity}."""
 
     def __init__(self, request: HttpRequest) -> None:
         self.session = request.session
@@ -46,7 +46,7 @@ class Cart:
             }
 
     def __len__(self) -> int:
-        # через __iter__ (фільтрує наявні товари) — узгоджено з total()
+        # via __iter__ (filters existing products) — consistent with total()
         return sum(item["quantity"] for item in self)
 
     def total(self) -> Decimal:
