@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Реєстрація | Hop &amp; Barley{% endblock %}
+{% block main_class %}auth-page-wrapper{% endblock %}
+{% block content %}
+<div class="auth-background"><img src="{% static 'img/background/pattern.jpg' %}" alt=""></div>
+<div class="auth-form-container">
+  <div class="auth-container auth-container--register">
+    <div class="Legend"><h1 class="auth-title">Реєстрація</h1></div>
+    <form class="auth-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="InputField">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <div class="ButtonGroup"><button type="submit" class="button button--primary">Зареєструватися</button></div>
+    </form>
+    <p class="auth-switch">Вже маєте акаунт? <a href="{% url 'users:login' %}">Увійти</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -29,16 +29,14 @@
         </nav>
         {% if user.is_authenticated %}
         <div class="header__user-actions">
-            {# TODO(users unit): посилання на /account/ #}
-            <a href="#" class="user-icon" aria-label="My Account"><img src="{% static 'img/icons/User_alt.svg' %}" alt="Account"></a>
+            <a href="{% url 'users:profile' %}" class="user-icon" aria-label="My Account"><img src="{% static 'img/icons/User_alt.svg' %}" alt="Account"></a>
             {# TODO(cart unit): посилання на /cart/ #}
             <a href="#" class="cart-icon" aria-label="Shopping Cart"><img src="{% static 'img/icons/Shopping_bag.svg' %}" alt="Cart"></a>
         </div>
         {% else %}
         <div class="header__auth-buttons">
-            {# TODO(users unit): /account/login/ та /account/register/ #}
-            <a href="#" class="button button--secondary">Sign in</a>
-            <a href="#" class="button button--primary">Register</a>
+            <a href="{% url 'users:login' %}" class="button button--secondary">Sign in</a>
+            <a href="{% url 'users:register' %}" class="button button--primary">Register</a>
         </div>
         {% endif %}
     </div>

@@ -94,3 +94,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="shop@example.com")
 ADMINS = [("Admin", env("ADMIN_EMAIL", default="admin@example.com"))]
+
+# Авторизація (session-based для веба)
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "users:profile"
+LOGOUT_REDIRECT_URL = "products:list"
