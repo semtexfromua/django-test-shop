@@ -146,3 +146,12 @@ def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
 def test_schema_and_docs(api: APIClient) -> None:
     assert api.get(reverse("api:schema")).status_code == 200
     assert api.get(reverse("api:docs")).status_code == 200
+
+
+@pytest.mark.django_db
+def test_register_requires_email(api: APIClient) -> None:
+    resp = api.post(
+        reverse("api:register"), {"username": "noemail", "password": "Br3wMaster!99"}
+    )
+    assert resp.status_code == 400
+    assert "email" in resp.data

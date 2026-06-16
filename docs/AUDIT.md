@@ -12,13 +12,19 @@
 ---
 
 ## Цикл 1 — Коректність і бізнес-логіка
-_(моделі, services, транзакції, граничні випадки, гроші, stock)_
+Рев'ю: 2 субагенти (orders/payments/reviews-ядро + catalog/users/analytics), баги відтворювали емпірично.
 
 ### Знахідки
-_(заповнюється)_
+- ✅ 🔴 **C1** `orders/services.py` — checkout продавав деактивовані товари (`cart.__iter__` брав `Product.objects`, не `.active()`; `create_order` не перевіряв `is_active`). Фікс: lock `filter(pk__in, is_active=True)` → `InsufficientStock`. Покрито web+API. +тест.
+- ✅ 🟠 **C2** дабл-сабміт checkout → дублі замовлень/оплат/списань. Фікс: guard від повторного сабміту у формі (`dataset.sent`). Залишок: одночасні запити (concurrent) — потребує idempotency-key, відкладено й задокументовано тут.
+- ✅ 🟠 **I1** `Cart.__len__` розходився з `__iter__`/`total()` при видаленні товару. Фікс: `__len__` через `__iter__`. +тест.
+- ✅ 🟠 **slug-колізія** (різні назви → однаковий slug) і не-Latin назви (порожній slug) → IntegrityError 500. Фікс: `_unique_slug` (суфікс `-2/-3…` + fallback) у `Category`/`Product.save`. +2 тести.
+- ✅ 🟡 API register не вимагав email (вебформа вимагає). Фікс: `email` обов'язковий у `RegisterSerializer`. +тест.
+- ⏭️ 🟡 `Category` self-parent/цикли — латентне (нема tree-walking коду); YAGNI, відкладено.
+- Перевірено чистим (не баги): snapshot ціни, оверселл(sequential), atomic+email rollback, cancel-ідемпотентність, reviews-authz, catalog query-params/пагінація/avg_rating, analytics.
 
 ### Результат
-_(ruff/mypy/pytest + commit)_
+ruff/mypy чисті, pytest **85 passed**, coverage 95.12%. Побічно: прибрано зайвий `type: ignore` у `products/views.py`.
 
 ---
 

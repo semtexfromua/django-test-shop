@@ -39,7 +39,11 @@ def create_order(user: User, items: list[tuple[Product, int]], contact: OrderCon
     """
     with transaction.atomic():
         ids = [product.pk for product, _ in items]
-        locked = {p.pk: p for p in Product.objects.select_for_update().filter(pk__in=ids)}
+        # тільки активні: товар, деактивований після додавання в кошик, не продається
+        locked = {
+            p.pk: p
+            for p in Product.objects.select_for_update().filter(pk__in=ids, is_active=True)
+        }
         order = Order.objects.create(
             user=user,
             full_name=contact.full_name,

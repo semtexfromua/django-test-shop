@@ -65,7 +65,7 @@ class ProductDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         product = cast(Product, self.object)
         # reverse-accessor `reviews` (з апки reviews) — без import, щоб уникнути циклу
-        reviews = product.reviews.select_related("user")  # type: ignore[attr-defined]
+        reviews = product.reviews.select_related("user")
         ctx["reviews"] = reviews
         ctx["avg_rating"] = reviews.aggregate(avg=Avg("rating"))["avg"]
         return ctx
