@@ -39,6 +39,14 @@ def test_graphql_revenue_for_staff() -> None:
 
 
 @pytest.mark.django_db
+def test_graphql_denied_for_anonymous() -> None:
+    resp = _gql(Client(), "{ revenue }")
+    body = resp.json()
+    assert body.get("errors")
+    assert body["data"]["revenue"] is None
+
+
+@pytest.mark.django_db
 def test_graphql_denied_for_non_staff() -> None:
     user = cast(User, UserFactory())
     client = Client()
