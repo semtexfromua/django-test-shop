@@ -18,8 +18,8 @@ def test_register_creates_and_logs_in(client: Client) -> None:
         },
     )
     assert resp.status_code == 302
-    assert User.objects.filter(username="alice").exists()
-    assert "_auth_user_id" in client.session
+    alice = User.objects.get(username="alice")
+    assert int(client.session["_auth_user_id"]) == alice.pk
 
 
 @pytest.mark.django_db
@@ -68,3 +68,23 @@ def test_password_change(client: Client) -> None:
     assert resp.status_code == 302
     u = User.objects.get(username="dave")
     assert u.check_password("NewPwd!67890")
+
+
+@pytest.mark.django_db
+def test_login_invalid_shows_error(client: Client) -> None:
+    User.objects.create_user(username="frank", password="Str0ngPwd!23")
+    resp = client.post(reverse("users:login"), {"username": "frank", "password": "wrong"})
+    assert resp.status_code == 200  # форма перерендерюється
+    assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
+def test_profile_edit_ignores_non_form_fields(client: Client) -> None:
+    User.objects.create_user(username="erin", password="Str0ngPwd!23")
+    client.login(username="erin", password="Str0ngPwd!23")
+    client.post(
+        reverse("users:profile"),
+        {"first_name": "Erin", "email": "e@e.com", "is_staff": "true"},
+    )
+    u = User.objects.get(username="erin")
+    assert u.is_staff is False

@@ -26,6 +26,7 @@ class RegisterForm(UserCreationForm):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        self.fields["email"].required = True  # email потрібен для сповіщень (orders)
         _style(self)
 
 
