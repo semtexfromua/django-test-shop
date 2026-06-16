@@ -33,9 +33,21 @@
     </section>
 
     <section class="reviews-section">
-        <h2 class="reviews-title">Відгуки</h2>
-        {# TODO(reviews unit): сюди прийдуть .review-card з рейтингами та формою відгуку #}
-        <p>Відгуків поки немає.</p>
+        <h2 class="reviews-title">Відгуки{% if avg_rating %} — {{ avg_rating|floatformat:1 }}★{% endif %}</h2>
+        {% if user.is_authenticated %}
+        <p><a href="{% url 'reviews:create' product.slug %}" class="button button--secondary">Залишити відгук</a></p>
+        {% endif %}
+        <div class="reviews-grid">
+        {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-rating">{% for _ in ""|center:review.rating %}★{% endfor %}</div>
+                <div class="review-body"><p class="review-text">{{ review.comment }}</p></div>
+                <div class="review-author"><span class="author-name">{{ review.user.username }}</span></div>
+            </div>
+        {% empty %}
+            <p>Відгуків поки немає.</p>
+        {% endfor %}
+        </div>
     </section>
 </div>
 {% endblock %}

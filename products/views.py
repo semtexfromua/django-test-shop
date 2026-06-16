@@ -1,8 +1,8 @@
 """В'юхи каталогу."""
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, cast
 
-from django.db.models import Q, QuerySet
+from django.db.models import Avg, Q, QuerySet
 from django.views.generic import DetailView, ListView
 
 from .models import Category, Product
@@ -60,3 +60,12 @@ class ProductDetailView(DetailView):
 
     def get_queryset(self) -> QuerySet[Product]:
         return Product.objects.active().select_related("category")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        product = cast(Product, self.object)
+        # reverse-accessor `reviews` (з апки reviews) — без import, щоб уникнути циклу
+        reviews = product.reviews.select_related("user")  # type: ignore[attr-defined]
+        ctx["reviews"] = reviews
+        ctx["avg_rating"] = reviews.aggregate(avg=Avg("rating"))["avg"]
+        return ctx
