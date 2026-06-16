@@ -65,6 +65,31 @@ def test_cancel_order_restores_stock() -> None:
 
 
 @pytest.mark.django_db
+def test_cancel_order_idempotent() -> None:
+    user = cast(User, UserFactory())
+    product = cast(Product, ProductFactory(stock=1))
+    order = _order(user, Order.Status.PAID, Decimal("10"))
+    OrderItem.objects.create(order=order, product=product, quantity=2, price=Decimal("5"))
+    cancel_order(order)
+    cancel_order(order)  # повторне скасування не має повернути stock удруге
+    product.refresh_from_db()
+    assert product.stock == 3
+    assert order.status == Order.Status.CANCELLED
+
+
+@pytest.mark.django_db
+def test_orders_by_status_counts() -> None:
+    user = cast(User, UserFactory())
+    _order(user, Order.Status.PAID, Decimal("1"))
+    _order(user, Order.Status.PAID, Decimal("1"))
+    _order(user, Order.Status.PENDING, Decimal("1"))
+    by_status = analytics.orders_by_status()
+    assert by_status["paid"] == 2
+    assert by_status["pending"] == 1
+    assert analytics.order_count() == 3
+
+
+@pytest.mark.django_db
 def test_dashboard_requires_staff(client: Client) -> None:
     assert client.get(reverse("orders:analytics")).status_code == 302
     user = cast(User, UserFactory())
