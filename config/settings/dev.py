@@ -1,5 +1,5 @@
 """Налаштування для локальної розробки."""
-from .base import *  # noqa: F403
+from .base import *
 
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]  # noqa: S104
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]

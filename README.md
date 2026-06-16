@@ -16,7 +16,7 @@ docker compose up --build
 ## Локальна розробка
 ```bash
 uv sync
-docker compose up -d db                 # Postgres на localhost:5432
+docker compose up -d db                 # Postgres на localhost:5433
 uv run python manage.py migrate
 uv run python manage.py runserver
 ```
