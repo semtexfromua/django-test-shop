@@ -41,3 +41,22 @@ def test_active_manager_excludes_inactive() -> None:
     Product.objects.create(name="A", price=Decimal("1"), category=cat, is_active=True)
     Product.objects.create(name="B", price=Decimal("2"), category=cat, is_active=False)
     assert Product.objects.active().count() == 1
+
+
+@pytest.mark.django_db
+def test_slug_collision_gets_unique_suffix() -> None:
+    cat = Category.objects.create(name="Hops")
+    p1 = Product.objects.create(name="Cascade Hops", price=Decimal("1"), category=cat)
+    p2 = Product.objects.create(name="Cascade  Hops", price=Decimal("1"), category=cat)
+    assert p1.slug == "cascade-hops"
+    assert p2.slug == "cascade-hops-2"
+
+
+@pytest.mark.django_db
+def test_non_latin_name_gets_nonempty_unique_slug() -> None:
+    cat = Category.objects.create(name="Malts")
+    p1 = Product.objects.create(name="日本語", price=Decimal("1"), category=cat)
+    p2 = Product.objects.create(name="中文", price=Decimal("1"), category=cat)
+    assert p1.slug
+    assert p2.slug
+    assert p1.slug != p2.slug

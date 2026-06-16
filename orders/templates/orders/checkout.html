@@ -10,7 +10,8 @@
     </ul>
     <p><strong>Разом: ${{ cart.total }}</strong></p>
   </div>
-  <form class="auth-form" method="post">
+  <form class="auth-form" method="post" onsubmit="if(this.dataset.sent)return false;this.dataset.sent=1;">
+    {# guard від подвійного кліку; повний concurrent-захист — idempotency-key (відкладено, див. AUDIT) #}
     {% csrf_token %}
     {% for field in form %}
     <div class="InputField">

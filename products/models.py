@@ -7,6 +7,18 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 
+def _unique_slug(instance: models.Model) -> str:
+    """Унікальний slug із поля name: суфікс -2/-3… на колізіях, fallback для не-Latin назв."""
+    base = slugify(getattr(instance, "name", "")) or "item"
+    manager = type(instance)._default_manager
+    slug = base
+    counter = 2
+    while manager.filter(slug=slug).exclude(pk=instance.pk).exists():
+        slug = f"{base}-{counter}"
+        counter += 1
+    return slug
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
@@ -25,7 +37,7 @@ class Category(models.Model):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = _unique_slug(self)
         super().save(*args, **kwargs)
 
 
@@ -58,7 +70,7 @@ class Product(models.Model):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = _unique_slug(self)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self) -> str:

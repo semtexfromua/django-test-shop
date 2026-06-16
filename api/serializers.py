@@ -5,15 +5,9 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from orders.models import CartItem, Order, OrderItem
-from products.models import Category, Product
+from products.models import Product
 from reviews.models import Review
 from users.models import User
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ("id", "name", "slug", "parent")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -59,6 +53,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.active())
     product_name = serializers.StringRelatedField(source="product", read_only=True)
+    quantity = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = CartItem
@@ -66,6 +61,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, validators=[validate_password])
 
     class Meta:

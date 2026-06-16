@@ -66,6 +66,8 @@ def cart_remove(request: HttpRequest, product_id: int) -> HttpResponse:
 
 
 class CheckoutView(LoginRequiredMixin, FormView):
+    """Оформлення: створює замовлення з кошика й проводить оплату в одній транзакції."""
+
     template_name = "orders/checkout.html"
     form_class = OrderForm
 
@@ -104,11 +106,23 @@ class CheckoutView(LoginRequiredMixin, FormView):
 
 
 class OrderListView(LoginRequiredMixin, ListView):
+    """Історія замовлень користувача з фільтром за статусом."""
+
     template_name = "orders/order_list.html"
     context_object_name = "orders"
 
     def get_queryset(self) -> QuerySet[Order]:
-        return Order.objects.filter(user=cast(User, self.request.user))
+        qs = Order.objects.filter(user=cast(User, self.request.user))
+        status = self.request.GET.get("status")
+        if status in Order.Status.values:
+            qs = qs.filter(status=status)
+        return qs
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        ctx["statuses"] = Order.Status.choices
+        ctx["current_status"] = self.request.GET.get("status", "")
+        return ctx
 
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
@@ -122,6 +136,8 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
 
 class AnalyticsDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """Staff-дашборд: виторг, к-сть замовлень за статусами, топ-товари."""
+
     template_name = "orders/analytics.html"
 
     def test_func(self) -> bool:

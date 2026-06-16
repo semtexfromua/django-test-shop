@@ -6,7 +6,14 @@ from django.core.management.base import BaseCommand
 
 from products.models import Category, Product
 
-CATEGORIES = ["Hops", "Malts", "Yeast", "Kits"]
+# (назва, батько|None) — батьки перед дітьми; демонструє вкладені категорії
+CATEGORY_TREE: list[tuple[str, str | None]] = [
+    ("Ingredients", None),
+    ("Kits", None),
+    ("Hops", "Ingredients"),
+    ("Malts", "Ingredients"),
+    ("Yeast", "Ingredients"),
+]
 
 # (name, category, price, stock)
 PRODUCTS: list[tuple[str, str, str, int]] = [
@@ -30,8 +37,9 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         cats: dict[str, Category] = {}
-        for name in CATEGORIES:
-            cats[name], _ = Category.objects.get_or_create(name=name)
+        for name, parent_name in CATEGORY_TREE:
+            parent = cats[parent_name] if parent_name else None
+            cats[name], _ = Category.objects.get_or_create(name=name, defaults={"parent": parent})
         for name, cat_name, price, stock in PRODUCTS:
             Product.objects.get_or_create(
                 name=name,

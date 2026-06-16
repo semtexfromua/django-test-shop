@@ -132,6 +132,51 @@ def test_cart_update_product_swap_no_500(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_api_order_insufficient_stock_rolls_back(api: APIClient) -> None:
+    from payments.models import Payment
+
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory(price=Decimal("10.00"), stock=1))
+    CartItem.objects.create(user=user, product=product, quantity=5)
+    resp = api.post(
+        reverse("api:order-list"),
+        {
+            "full_name": "B",
+            "email": "b@e.com",
+            "phone": "1",
+            "shipping_address": "a",
+            "method": "card",
+        },
+    )
+    assert resp.status_code == 400
+    assert Order.objects.count() == 0
+    assert Payment.objects.count() == 0
+    assert CartItem.objects.filter(user=user).count() == 1  # кошик не очищено
+    product.refresh_from_db()
+    assert product.stock == 1
+
+
+@pytest.mark.django_db
+def test_cart_rejects_zero_quantity(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory(stock=5))
+    resp = api.post(reverse("api:cart-list"), {"product": product.pk, "quantity": 0})
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_cart_owner_isolation(api: APIClient) -> None:
+    owner = cast(User, UserFactory())
+    other = cast(User, UserFactory())
+    product = cast(Product, ProductFactory(stock=5))
+    item = CartItem.objects.create(user=owner, product=product, quantity=1)
+    api.force_authenticate(user=other)
+    assert api.get(reverse("api:cart-detail", args=[item.pk])).status_code == 404
+
+
+@pytest.mark.django_db
 def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
     user = cast(User, UserFactory())
     api.force_authenticate(user=user)
@@ -146,3 +191,12 @@ def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
 def test_schema_and_docs(api: APIClient) -> None:
     assert api.get(reverse("api:schema")).status_code == 200
     assert api.get(reverse("api:docs")).status_code == 200
+
+
+@pytest.mark.django_db
+def test_register_requires_email(api: APIClient) -> None:
+    resp = api.post(
+        reverse("api:register"), {"username": "noemail", "password": "Br3wMaster!99"}
+    )
+    assert resp.status_code == 400
+    assert "email" in resp.data

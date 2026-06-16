@@ -61,3 +61,12 @@ def test_create_order_sends_email(django_capture_on_commit_callbacks: Any) -> No
     with django_capture_on_commit_callbacks(execute=True):
         create_order(user, [(p, 1)], CONTACT)
     assert len(mail.outbox) >= 1
+
+
+@pytest.mark.django_db
+def test_create_order_rejects_inactive_product() -> None:
+    user = cast(User, UserFactory())
+    p = cast(Product, ProductFactory(price=Decimal("10.00"), stock=5, is_active=False))
+    with pytest.raises(InsufficientStock):
+        create_order(user, [(p, 1)], CONTACT)
+    assert Order.objects.count() == 0

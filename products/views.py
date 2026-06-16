@@ -2,7 +2,8 @@
 from decimal import Decimal, InvalidOperation
 from typing import Any, cast
 
-from django.db.models import Avg, Q, QuerySet
+from django.db.models import Avg, Q, QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.views.generic import DetailView, ListView
 
 from .models import Category, Product
@@ -22,6 +23,8 @@ def _parse_decimal(value: str | None) -> Decimal | None:
 
 
 class ProductListView(ListView):
+    """Каталог: активні товари з фільтрами (категорія/ціна), пошуком, сортуванням, пагінацією."""
+
     model = Product
     template_name = "products/product_list.html"
     context_object_name = "products"
@@ -39,7 +42,9 @@ class ProductListView(ListView):
         if q := params.get("q"):
             qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
         sort = params.get("sort")
-        if sort in SORT_OPTIONS:
+        if sort == "popularity":
+            qs = qs.annotate(_sold=Coalesce(Sum("order_items__quantity"), 0)).order_by("-_sold")
+        elif sort in SORT_OPTIONS:
             qs = qs.order_by(sort)
         return qs
 
@@ -65,7 +70,7 @@ class ProductDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         product = cast(Product, self.object)
         # reverse-accessor `reviews` (з апки reviews) — без import, щоб уникнути циклу
-        reviews = product.reviews.select_related("user")  # type: ignore[attr-defined]
+        reviews = product.reviews.select_related("user")
         ctx["reviews"] = reviews
         ctx["avg_rating"] = reviews.aggregate(avg=Avg("rating"))["avg"]
         return ctx

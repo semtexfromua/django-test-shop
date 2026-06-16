@@ -3,6 +3,15 @@
 {% block content %}
 <div class="container account-page">
   <h1>Мої замовлення</h1>
+  <form method="get" class="order-filter">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">Усі статуси</option>
+      {% for value, label in statuses %}
+      <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <noscript><button type="submit">Фільтр</button></noscript>
+  </form>
   {% if orders %}
   <table class="cart-table">
     <thead><tr><th>#</th><th>Дата</th><th>Статус</th><th>Сума</th></tr></thead>

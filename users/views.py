@@ -13,6 +13,8 @@ from .models import User
 
 
 class RegisterView(CreateView):
+    """Реєстрація з автоматичним входом після створення акаунта."""
+
     form_class = RegisterForm
     template_name = "users/register.html"
     success_url = reverse_lazy("users:profile")

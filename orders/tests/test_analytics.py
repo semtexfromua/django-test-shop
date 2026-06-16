@@ -84,8 +84,8 @@ def test_orders_by_status_counts() -> None:
     _order(user, Order.Status.PAID, Decimal("1"))
     _order(user, Order.Status.PENDING, Decimal("1"))
     by_status = analytics.orders_by_status()
-    assert by_status["paid"] == 2
-    assert by_status["pending"] == 1
+    assert by_status["Оплачено"] == 2
+    assert by_status["Очікує"] == 1
     assert analytics.order_count() == 3
 
 

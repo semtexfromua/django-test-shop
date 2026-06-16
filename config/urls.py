@@ -1,9 +1,9 @@
 """Кореневий URL-конфіг проєкту."""
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import URLPattern, URLResolver, include, path
+from django.urls import URLPattern, URLResolver, include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
+from django.views.static import serve
 from graphene_django.views import GraphQLView
 
 urlpatterns: list[URLResolver | URLPattern] = [
@@ -16,5 +16,7 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("", include("products.urls")),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Медіа під gunicorn (demo-деплой). Для реального проду — nginx/CDN/обʼєктне сховище.
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+]

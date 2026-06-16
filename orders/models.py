@@ -40,6 +40,11 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(condition=models.Q(quantity__gte=1), name="orderitem_qty_gte_1"),
+        ]
+
     def __str__(self) -> str:
         return f"{self.quantity}× {self.product.name}"
 
@@ -60,6 +65,9 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = ("user", "product")
+        constraints = [
+            models.CheckConstraint(condition=models.Q(quantity__gte=1), name="cartitem_qty_gte_1"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.quantity}× {self.product.name}"

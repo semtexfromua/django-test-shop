@@ -6,6 +6,8 @@ import pytest
 from django.test import Client, RequestFactory
 from django.urls import reverse
 
+from orders.models import Order, OrderItem
+from orders.tests.factories import OrderFactory
 from products.models import Category, Product
 from products.tests.factories import CategoryFactory, ProductFactory
 from products.views import ProductListView
@@ -66,6 +68,18 @@ def test_catalog_sort_by_price(client: Client) -> None:
     resp = client.get(reverse("products:list"), {"sort": "price"})
     prices = [p.price for p in resp.context["products"]]
     assert prices == sorted(prices)
+
+
+@pytest.mark.django_db
+def test_catalog_sort_by_popularity(client: Client) -> None:
+    popular = cast(Product, ProductFactory(name="Popular"))
+    rare = cast(Product, ProductFactory(name="Rare"))
+    order = cast(Order, OrderFactory(status=Order.Status.PAID))
+    OrderItem.objects.create(order=order, product=popular, quantity=10, price=Decimal("1"))
+    OrderItem.objects.create(order=order, product=rare, quantity=1, price=Decimal("1"))
+    resp = client.get(reverse("products:list"), {"sort": "popularity"})
+    names = [p.name for p in resp.context["products"]]
+    assert names.index("Popular") < names.index("Rare")
 
 
 @pytest.mark.django_db
