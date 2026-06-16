@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Мої замовлення | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container account-page">
+  <h1>Мої замовлення</h1>
+  {% if orders %}
+  <table class="cart-table">
+    <thead><tr><th>#</th><th>Дата</th><th>Статус</th><th>Сума</th></tr></thead>
+    <tbody>
+    {% for order in orders %}
+      <tr>
+        <td><a href="{% url 'orders:order_detail' order.pk %}">#{{ order.pk }}</a></td>
+        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+        <td>{{ order.get_status_display }}</td>
+        <td>${{ order.total_price }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Замовлень ще немає. <a href="{% url 'products:list' %}">До каталогу</a></p>
+  {% endif %}
+</div>
+{% endblock %}

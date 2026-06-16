@@ -31,8 +31,7 @@
     </tbody>
   </table>
   <p class="cart-total"><strong>Разом: ${{ cart.total }}</strong></p>
-  {# checkout url з'являється на Stage 5 #}
-  <a href="/checkout/" class="button button--primary">Оформити замовлення</a>
+  <a href="{% url 'orders:checkout' %}" class="button button--primary">Оформити замовлення</a>
   {% else %}
   <p>Кошик порожній. <a href="{% url 'products:list' %}">До каталогу</a></p>
   {% endif %}
