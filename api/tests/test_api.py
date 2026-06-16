@@ -237,6 +237,17 @@ def test_schema_and_docs(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_register_rejects_duplicate_email(api: APIClient) -> None:
+    UserFactory(email="dup@e.com")
+    resp = api.post(
+        reverse("api:register"),
+        {"username": "newbie", "email": "DUP@e.com", "password": "Br3wMaster!99"},
+    )
+    assert resp.status_code == 400
+    assert "email" in resp.data
+
+
+@pytest.mark.django_db
 def test_register_requires_email(api: APIClient) -> None:
     resp = api.post(
         reverse("api:register"), {"username": "noemail", "password": "Br3wMaster!99"}

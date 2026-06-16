@@ -68,5 +68,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "email", "password")
 
+    def validate_email(self, value: str) -> str:
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Користувач з такою поштою вже існує.")
+        return value
+
     def create(self, validated_data: dict[str, Any]) -> User:
         return User.objects.create_user(**validated_data)

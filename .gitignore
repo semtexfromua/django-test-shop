@@ -9,6 +9,9 @@ venv/
 /media/
 /staticfiles/
 
+# Playwright MCP artifacts
+.playwright-mcp/
+
 # Env / secrets
 .env
 !.env.example

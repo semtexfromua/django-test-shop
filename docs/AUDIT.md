@@ -146,7 +146,17 @@ ruff/mypy чисті, pytest **91 passed**, coverage 95.56%.
 ruff/mypy чисті, pytest **92 passed**, coverage 95.56%.
 
 ## R2 Цикл 3 — веб UI/шаблони (+ order-filter, popularity, messages)
-_(заповнюється)_
+Рев'ю: 1 адверсаріальний субагент (веб-шар), відтворення емпіричне + Playwright.
+
+- ✅ 🟡 (Medium) **Дублікати email**: ні модель, ні `RegisterForm`/`ProfileForm`, ні API `RegisterSerializer` не перевіряли унікальність → два акаунти на одну пошту (відтворено: 2× `dup@example.com`). Email — канал сповіщень (orders), тож має бути унікальним. Модельний `unique=True` відпав (у dev-БД 3 користувачі з порожнім email → міграція впала б; data-міграція непропорційна). Фікс: `clean_email` (iexact, з guard на непорожнє) у обох формах + `validate_email` в API-серіалізаторі. +3 тести (web register, web profile-чужий-email, API). Playwright: `PWDUP@e.com` проти наявного `pwdup@e.com` → поле invalid, "Користувач з такою поштою вже існує." (регістронезалежно).
+- ⏭️ Minor: `cart.py __iter__/total` беруть `Product.objects` (не `.active()`) → деактивований товар лишається у відображенні кошика/чекауту (тільки UX/сума; продаж уже закрито `create_order`-локом `is_active=True`).
+- ⏭️ Minor: out-of-stock товар все одно показує форму "Додати в кошик" (`min=1 max=0`) — функціонально безпечно (`cart_add` капить до 0 + повідомлення), косметика.
+- ⏭️ Minor: `OrderListView` без `paginate_by` — історія замовлень на одній сторінці (не вимога спеки; стабільний `ordering` є).
+- ⏭️ Minor (повтор): `cart_update` при `stock==0` тихо no-op (вже відкладено в R1).
+- Перевірено чистим: усі POST-форми мають `{% csrf_token %}`; усі 17 web-`{% url %}` резолвляться; нема `|safe`/`mark_safe` (автоескейп → нема stored-XSS); owner-scoping `OrderList/DetailView`; `LoginRequiredMixin` на checkout/profile/review; `UserPassesTestMixin` на аналітиці; `_parse_decimal` блокує NaN/Inf; пагінація зберігає фільтри; логаут POST+CSRF.
+
+### Результат
+ruff/mypy чисті, pytest **95 passed**, coverage 95.56%, Playwright OK.
 
 ## R2 Цикл 4 — API/цілісність (+ sold-ordering, CheckConstraint, міграція 0003)
 _(заповнюється)_

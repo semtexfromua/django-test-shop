@@ -29,6 +29,12 @@ class RegisterForm(UserCreationForm):
         self.fields["email"].required = True  # email потрібен для сповіщень (orders)
         _style(self)
 
+    def clean_email(self) -> str:
+        email: str = self.cleaned_data["email"]
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Користувач з такою поштою вже існує.")
+        return email
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -38,3 +44,9 @@ class ProfileForm(forms.ModelForm):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         _style(self)
+
+    def clean_email(self) -> str:
+        email: str = self.cleaned_data["email"]
+        if email and User.objects.exclude(pk=self.instance.pk).filter(email__iexact=email).exists():
+            raise forms.ValidationError("Користувач з такою поштою вже існує.")
+        return email
