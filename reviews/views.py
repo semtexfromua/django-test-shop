@@ -3,6 +3,7 @@ from typing import cast
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
@@ -37,7 +38,11 @@ class ReviewCreateView(LoginRequiredMixin, View):
             review = form.save(commit=False)
             review.product = product
             review.user = cast(User, request.user)
-            review.save()
+            try:
+                review.save()
+            except IntegrityError:  # гонка: дубль на unique(product, user)
+                messages.error(request, "Ви вже залишили відгук на цей товар.")
+                return redirect(product.get_absolute_url())
             messages.success(request, "Дякуємо за відгук!")
             return redirect(product.get_absolute_url())
         return render(

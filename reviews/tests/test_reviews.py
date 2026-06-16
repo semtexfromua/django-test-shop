@@ -80,6 +80,59 @@ def test_review_create_succeeds_for_purchaser(client: Client) -> None:
 
 
 @pytest.mark.django_db
+def test_review_create_blocked_for_anonymous(client: Client) -> None:
+    product = cast(Product, ProductFactory())
+    resp = client.post(
+        reverse("reviews:create", args=[product.slug]), {"rating": 5, "comment": "x"}
+    )
+    assert resp.status_code == 302
+    assert reverse("users:login") in resp["Location"]
+    assert Review.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_review_create_rejects_out_of_range_rating(client: Client) -> None:
+    user = cast(User, UserFactory())
+    client.force_login(user)
+    product = cast(Product, ProductFactory())
+    _paid_order(user, product)
+    resp = client.post(
+        reverse("reviews:create", args=[product.slug]), {"rating": 99, "comment": "x"}
+    )
+    assert resp.status_code == 200  # форма невалідна → перерендер
+    assert Review.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_pending_order_does_not_grant_review() -> None:
+    user = cast(User, UserFactory())
+    product = cast(Product, ProductFactory())
+    order = Order.objects.create(
+        user=user,
+        status=Order.Status.PENDING,
+        full_name="B",
+        email="b@e.com",
+        phone="1",
+        shipping_address="a",
+        total_price=Decimal("10"),
+    )
+    OrderItem.objects.create(order=order, product=product, quantity=1, price=product.price)
+    assert has_purchased(user, product) is False
+    assert can_review(user, product) is False
+
+
+@pytest.mark.django_db
+def test_view_level_duplicate_review_blocked(client: Client) -> None:
+    user = cast(User, UserFactory())
+    client.force_login(user)
+    product = cast(Product, ProductFactory())
+    _paid_order(user, product)
+    client.post(reverse("reviews:create", args=[product.slug]), {"rating": 5, "comment": "1"})
+    client.post(reverse("reviews:create", args=[product.slug]), {"rating": 3, "comment": "2"})
+    assert Review.objects.filter(product=product, user=user).count() == 1
+
+
+@pytest.mark.django_db
 def test_reviews_show_on_product_detail(client: Client) -> None:
     user = cast(User, UserFactory())
     product = cast(Product, ProductFactory())
