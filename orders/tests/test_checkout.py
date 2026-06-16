@@ -98,6 +98,17 @@ def test_order_list_shows_only_own(client: Client) -> None:
 
 
 @pytest.mark.django_db
+def test_order_list_filter_by_status(client: Client) -> None:
+    user = cast(User, UserFactory())
+    OrderFactory(user=user, status=Order.Status.PAID)
+    OrderFactory(user=user, status=Order.Status.DELIVERED)
+    client.force_login(user)
+    resp = client.get(reverse("orders:list"), {"status": "paid"})
+    statuses = [o.status for o in resp.context["orders"]]
+    assert statuses == ["paid"]
+
+
+@pytest.mark.django_db
 def test_order_detail_other_user_404(client: Client) -> None:
     user = cast(User, UserFactory())
     other = cast(User, UserFactory())

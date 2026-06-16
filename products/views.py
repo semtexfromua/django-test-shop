@@ -2,7 +2,8 @@
 from decimal import Decimal, InvalidOperation
 from typing import Any, cast
 
-from django.db.models import Avg, Q, QuerySet
+from django.db.models import Avg, Q, QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.views.generic import DetailView, ListView
 
 from .models import Category, Product
@@ -41,7 +42,9 @@ class ProductListView(ListView):
         if q := params.get("q"):
             qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
         sort = params.get("sort")
-        if sort in SORT_OPTIONS:
+        if sort == "popularity":
+            qs = qs.annotate(_sold=Coalesce(Sum("order_items__quantity"), 0)).order_by("-_sold")
+        elif sort in SORT_OPTIONS:
             qs = qs.order_by(sort)
         return qs
 

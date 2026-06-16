@@ -35,6 +35,7 @@
                 <option value="">New</option>
                 <option value="price" {% if current.sort == 'price' %}selected{% endif %}>Price ascending</option>
                 <option value="-price" {% if current.sort == '-price' %}selected{% endif %}>Price descending</option>
+                <option value="popularity" {% if current.sort == 'popularity' %}selected{% endif %}>Популярні</option>
             </select>
         </div>
         <button type="submit" class="button button--primary">Apply</button>

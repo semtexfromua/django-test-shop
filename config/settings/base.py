@@ -3,6 +3,7 @@
 Значення, що залежать від оточення (секрети, БД, email), читаються зі змінних
 середовища через `django-environ`. Локально їх можна задати у файлі `.env`.
 """
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -130,6 +131,12 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "REST API інтернет-магазину пивоварних інгредієнтів",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
 }
 
 # GraphQL (бонус — аналітика)

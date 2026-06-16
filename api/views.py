@@ -2,7 +2,8 @@
 from typing import Any, cast
 
 from django.db import transaction
-from django.db.models import Avg, QuerySet
+from django.db.models import Avg, QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.exceptions import PermissionDenied
@@ -33,13 +34,16 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     filterset_fields = ["category"]
     search_fields = ["name", "description"]
-    ordering_fields = ["price", "created_at"]
+    ordering_fields = ["price", "created_at", "sold"]
 
     def get_queryset(self) -> QuerySet[Product]:
         return (
             Product.objects.active()
             .select_related("category")
-            .annotate(avg_rating=Avg("reviews__rating"))
+            .annotate(
+                avg_rating=Avg("reviews__rating"),
+                sold=Coalesce(Sum("order_items__quantity"), 0),
+            )
             .order_by("-created_at")
         )
 
