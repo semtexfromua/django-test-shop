@@ -32,7 +32,11 @@ class InsufficientStock(Exception):
 
 
 def create_order(user: User, items: list[tuple[Product, int]], contact: OrderContact) -> Order:
-    """Атомарно: знімок цін, перевірка та списання залишків, email на commit."""
+    """Атомарно: знімок цін, перевірка та списання залишків, email на commit.
+
+    Конкурентні замовлення серіалізуються рядковим ``select_for_update``;
+    тестами покрито послідовний оверселл (не паралельний).
+    """
     with transaction.atomic():
         ids = [product.pk for product, _ in items]
         locked = {p.pk: p for p in Product.objects.select_for_update().filter(pk__in=ids)}
@@ -45,7 +49,9 @@ def create_order(user: User, items: list[tuple[Product, int]], contact: OrderCon
         )
         total = Decimal("0")
         for product, quantity in items:
-            locked_product = locked[product.pk]
+            locked_product = locked.get(product.pk)
+            if locked_product is None:
+                raise InsufficientStock(product, 0)
             if quantity > locked_product.stock:
                 raise InsufficientStock(locked_product, locked_product.stock)
             OrderItem.objects.create(

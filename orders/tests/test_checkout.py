@@ -56,6 +56,36 @@ def test_checkout_empty_cart_redirects(client: Client) -> None:
 
 
 @pytest.mark.django_db
+def test_checkout_insufficient_stock_rolls_back(client: Client) -> None:
+    """View-рівень: збій stock відкочує order+payment+stock, кошик лишається."""
+    from payments.models import Payment
+
+    user = cast(User, UserFactory())
+    client.force_login(user)
+    product = cast(Product, ProductFactory(price=Decimal("10.00"), stock=1))
+    session = client.session
+    session["cart"] = {str(product.pk): 5}  # більше, ніж є на складі
+    session.save()
+    resp = client.post(
+        reverse("orders:checkout"),
+        {
+            "full_name": "B",
+            "email": "b@e.com",
+            "phone": "1",
+            "shipping_address": "a",
+            "method": "card",
+        },
+    )
+    assert resp.status_code == 302
+    assert reverse("orders:cart_detail") in resp["Location"]
+    assert Order.objects.count() == 0
+    assert Payment.objects.count() == 0
+    product.refresh_from_db()
+    assert product.stock == 1
+    assert client.session["cart"] == {str(product.pk): 5}  # не очищено
+
+
+@pytest.mark.django_db
 def test_order_list_shows_only_own(client: Client) -> None:
     user = cast(User, UserFactory())
     other = cast(User, UserFactory())
