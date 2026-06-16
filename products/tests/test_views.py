@@ -99,3 +99,12 @@ def test_detail_inactive_product_404(client: Client) -> None:
 def test_detail_missing_slug_404(client: Client) -> None:
     resp = client.get(reverse("products:detail", kwargs={"slug": "nope"}))
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_catalog_ignores_non_numeric_price(client: Client) -> None:
+    ProductFactory(name="Visible")
+    for bad in ("abc", "NaN", "Infinity"):
+        resp = client.get(reverse("products:list"), {"min_price": bad, "max_price": bad})
+        assert resp.status_code == 200
+        assert [p.name for p in resp.context["products"]] == ["Visible"]

@@ -14,9 +14,11 @@ def _parse_decimal(value: str | None) -> Decimal | None:
     if not value:
         return None
     try:
-        return Decimal(value)
+        result = Decimal(value)
     except (InvalidOperation, TypeError):
         return None
+    # NaN/Infinity парсяться як Decimal, але валять filter(price__gte=...) → 500.
+    return result if result.is_finite() else None
 
 
 class ProductListView(ListView):
