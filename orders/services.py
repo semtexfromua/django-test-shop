@@ -81,3 +81,16 @@ def _send_order_emails(order: Order) -> None:
             f"Нове замовлення #{order.pk}", body, settings.DEFAULT_FROM_EMAIL, admin_emails,
             fail_silently=True,
         )
+
+
+def cancel_order(order: Order) -> None:
+    """Скасовує замовлення й повертає залишки на склад (ідемпотентно)."""
+    if order.status == Order.Status.CANCELLED:
+        return
+    with transaction.atomic():
+        for item in order.items.select_related("product"):
+            product = item.product
+            product.stock += item.quantity
+            product.save(update_fields=["stock"])
+        order.status = Order.Status.CANCELLED
+        order.save(update_fields=["status"])

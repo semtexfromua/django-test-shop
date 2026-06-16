@@ -2,18 +2,19 @@
 from typing import Any, cast
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, FormView, ListView
+from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from payments.services import process_payment
 from products.models import Product
 from users.models import User
 
+from . import analytics
 from .cart import Cart
 from .forms import OrderForm
 from .models import Order
@@ -118,3 +119,18 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         return Order.objects.filter(user=cast(User, self.request.user)).prefetch_related(
             "items__product"
         )
+
+
+class AnalyticsDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "orders/analytics.html"
+
+    def test_func(self) -> bool:
+        return bool(self.request.user.is_staff)
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        ctx["revenue"] = analytics.total_revenue()
+        ctx["order_count"] = analytics.order_count()
+        ctx["by_status"] = analytics.orders_by_status()
+        ctx["top_products"] = analytics.top_products()
+        return ctx
