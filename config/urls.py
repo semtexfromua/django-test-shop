@@ -1,4 +1,4 @@
-"""Кореневий URL-конфіг проєкту."""
+"""Project root URL configuration."""
 from django.conf import settings
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path, re_path
@@ -9,7 +9,7 @@ from graphql.validation import ASTValidationRule, NoSchemaIntrospectionCustomRul
 
 
 def graphql_validation_rules() -> list[type[ASTValidationRule]]:
-    """У проді вимикаємо introspection (розкриття схеми анонімам); у dev — лишаємо для GraphiQL."""
+    """Disable introspection in prod (schema disclosure); keep it in dev for GraphiQL."""
     return [] if settings.DEBUG else [NoSchemaIntrospectionCustomRule]
 
 
@@ -31,7 +31,7 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("", include("products.urls")),
 ]
 
-# Медіа під gunicorn (demo-деплой). Для реального проду — nginx/CDN/обʼєктне сховище.
+# Media under gunicorn (demo deploy). For real production — nginx/CDN/object storage.
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]

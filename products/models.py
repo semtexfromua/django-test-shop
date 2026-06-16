@@ -1,4 +1,4 @@
-"""Моделі каталогу: категорії та товари."""
+"""Catalog models: categories and products."""
 from typing import Any
 
 from django.core.validators import MinValueValidator
@@ -8,7 +8,7 @@ from django.utils.text import slugify
 
 
 def _unique_slug(instance: models.Model) -> str:
-    """Унікальний slug із поля name: суфікс -2/-3… на колізіях, fallback для не-Latin назв."""
+    """Unique slug from name: suffix -2/-3… on collisions, fallback for non-Latin names."""
     base = slugify(getattr(instance, "name", "")) or "item"
     manager = type(instance)._default_manager
     slug = base

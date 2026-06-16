@@ -1,4 +1,4 @@
-"""Конфігурація застосунку products."""
+"""Products app configuration."""
 from django.apps import AppConfig
 
 

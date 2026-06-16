@@ -1,4 +1,4 @@
-"""factory_boy-фабрика користувача (для тестів інших апок)."""
+"""factory_boy user factory (used by other apps' tests)."""
 import factory
 from factory.django import DjangoModelFactory
 

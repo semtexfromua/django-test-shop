@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-"""Командна утиліта Django."""
+"""Django command-line utility."""
 import os
 import sys
 
 
 def main() -> None:
-    """Точка входу для адміністративних команд Django."""
+    """Entry point for Django administrative commands."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
         raise ImportError(
-            "Не вдалося імпортувати Django. Активуй середовище або запускай через `uv run`."
+            "Couldn't import Django. Activate your environment or run via `uv run`."
         ) from exc
     execute_from_command_line(sys.argv)
 

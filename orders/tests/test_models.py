@@ -1,4 +1,4 @@
-"""Тести моделей замовлень."""
+"""Order model tests."""
 from decimal import Decimal
 from typing import cast
 

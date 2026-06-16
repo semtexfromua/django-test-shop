@@ -1,4 +1,4 @@
-"""В'юха створення відгуку."""
+"""Review creation view."""
 from typing import cast
 
 from django.contrib import messages
@@ -16,7 +16,7 @@ from .services import can_review
 
 
 class ReviewCreateView(LoginRequiredMixin, View):
-    """Створення відгуку — лише після покупки товару (один раз на товар)."""
+    """Create a review — only after purchasing the product (once per product)."""
 
     def _product(self) -> Product:
         return get_object_or_404(Product.objects.active(), slug=self.kwargs["slug"])
@@ -42,7 +42,7 @@ class ReviewCreateView(LoginRequiredMixin, View):
             review.user = cast(User, request.user)
             try:
                 review.save()
-            except IntegrityError:  # гонка: дубль на unique(product, user)
+            except IntegrityError:  # race: duplicate on unique(product, user)
                 messages.error(request, "Ви вже залишили відгук на цей товар.")
                 return redirect(product.get_absolute_url())
             messages.success(request, "Дякуємо за відгук!")

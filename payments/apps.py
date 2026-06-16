@@ -1,4 +1,4 @@
-"""Конфігурація застосунку payments."""
+"""Payments app configuration."""
 from django.apps import AppConfig
 
 

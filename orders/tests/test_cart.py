@@ -1,4 +1,4 @@
-"""Тести сесійного кошика."""
+"""Session cart tests."""
 from decimal import Decimal
 from typing import cast
 
@@ -68,6 +68,6 @@ def test_cart_len_consistent_when_product_deleted(http_request: HttpRequest) -> 
     product = cast(Product, ProductFactory(price=Decimal("10.00")))
     cart = Cart(http_request)
     cart.add(product, 3)
-    product.delete()  # товар без замовлень можна видалити
-    assert len(cart) == 0  # узгоджено з __iter__/total (без застарілого лічильника)
+    product.delete()  # a product with no orders can be deleted
+    assert len(cart) == 0  # consistent with __iter__/total (no stale counter)
     assert cart.total() == Decimal("0")

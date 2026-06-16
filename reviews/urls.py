@@ -1,4 +1,4 @@
-"""URL-и відгуків."""
+"""Review URLs."""
 from django.urls import path
 
 from . import views

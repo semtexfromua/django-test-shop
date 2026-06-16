@@ -1,4 +1,4 @@
-"""Моделі замовлень."""
+"""Order models."""
 from decimal import Decimal
 
 from django.conf import settings
@@ -54,7 +54,7 @@ class OrderItem(models.Model):
 
 
 class CartItem(models.Model):
-    """БД-кошик для REST API (веб-інтерфейс використовує сесійний кошик)."""
+    """DB cart for the REST API (the web UI uses a session cart)."""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cart_items"
