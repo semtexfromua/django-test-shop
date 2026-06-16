@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     # local
     "users",
     "products",
+    "orders",
+    "payments",
 ]
 
 MIDDLEWARE = [

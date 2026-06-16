@@ -30,8 +30,7 @@
         {% if user.is_authenticated %}
         <div class="header__user-actions">
             <a href="{% url 'users:profile' %}" class="user-icon" aria-label="My Account"><img src="{% static 'img/icons/User_alt.svg' %}" alt="Account"></a>
-            {# TODO(cart unit): посилання на /cart/ #}
-            <a href="#" class="cart-icon" aria-label="Shopping Cart"><img src="{% static 'img/icons/Shopping_bag.svg' %}" alt="Cart"></a>
+            <a href="{% url 'orders:cart_detail' %}" class="cart-icon" aria-label="Shopping Cart"><img src="{% static 'img/icons/Shopping_bag.svg' %}" alt="Cart"></a>
         </div>
         {% else %}
         <div class="header__auth-buttons">
