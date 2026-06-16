@@ -59,6 +59,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.active())
     product_name = serializers.StringRelatedField(source="product", read_only=True)
+    quantity = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = CartItem

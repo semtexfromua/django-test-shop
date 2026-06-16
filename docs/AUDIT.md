@@ -57,7 +57,15 @@ ruff/mypy чисті, pytest **86 passed**, coverage 95.24%.
 ---
 
 ## Цикл 4 — API та цілісність даних
-_(DRF, серіалізатори, валідація, N+1, граничні)_
+Рев'ю: 1 субагент (серіалізатори/viewsets/N+1/констрейнти/міграції), відтворення через APIClient.
+
+### Знахідки
+- ✅ 🟠 (HIGH) API-кошик приймав `quantity=0` (`PositiveIntegerField`→min 0 у DRF; веб захищений, API — ні) → "оплачене" замовлення на 0 грн із порожніми позиціями, що ще й рахувалось як покупка для відгуків. Фікс: `min_value=1` у `CartItemSerializer` + DB `CheckConstraint(quantity≥1)` на `CartItem`/`OrderItem` (міграція 0003). +тест.
+- ⏭️ 🟡 `Order.user on_delete=CASCADE` (видалення юзера знищує історію замовлень) — дизайн-рішення; для прод-shop краще `PROTECT`/`SET_NULL`. Відкладено (нема вимоги зберігати замовлення після видалення акаунта).
+- Перевірено чистим: N+1 (products/orders/cart/reviews мають select_related/prefetch), валідація (negative/huge qty, blank/missing contacts → 400), avg_rating null, коди 201/400/404/405, on_delete/unique_together/Decimal консистентні.
+
+### Результат
+ruff/mypy чисті, pytest **87 passed**, coverage 95.26%.
 
 ---
 
