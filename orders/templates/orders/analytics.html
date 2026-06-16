@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Аналітика | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container account-page">
+  <h1>Аналітика</h1>
+  <p>Виторг (оплачені/відправлені/доставлені): <strong>${{ revenue }}</strong></p>
+  <p>Усього замовлень: <strong>{{ order_count }}</strong></p>
+
+  <h2>За статусами</h2>
+  <ul>{% for status, n in by_status.items %}<li>{{ status }}: {{ n }}</li>{% endfor %}</ul>
+
+  <h2>Топ-товари (продано одиниць)</h2>
+  <ol>{% for row in top_products %}<li>{{ row.product__name }} — {{ row.sold }}</li>{% empty %}<li>Немає продажів.</li>{% endfor %}</ol>
+</div>
+{% endblock %}
