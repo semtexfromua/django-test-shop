@@ -124,7 +124,14 @@ ruff/mypy чисті, pytest **90 passed**, coverage 95.56%.
 # Раунд 2 (повторний аудит) — фіксимо Medium+, Minor лише нотуємо
 
 ## R2 Цикл 1 — коректність/бізнес-логіка (адверсаріально + код аудиту-1)
-_(заповнюється)_
+Рев'ю: 1 адверсаріальний субагент, відтворення емпіричне.
+
+- ✅ 🟠 (Important) API `ProductViewSet`: `avg_rating=Avg(reviews)` + `sold=Sum(order_items)` на одному запиті → **JOIN-множення** (sold × к-сть відгуків) → `?ordering=sold` бреше (bestseller програє менш-продаваному з відгуками). Фікс: `sold` через `Subquery` (avg лишився коректним). +тест. Web-сорт був чистий (нема avg-join).
+- ⏭️ Minor (нотатка): `cancel_order` лишає `Payment.status=PAID` (revenue не зачеплено — фільтр за статусом замовлення); API payment `method` без валідації проти choices (data-quality; веб валідує).
+- Перевірено чистим: deactivated-mid-checkout, web popularity, top_products, order-status-фільтр, CheckConstraint(qty≥1) на всіх шляхах, `Cart.__len__`, transaction-boundaries.
+
+### Результат
+ruff/mypy чисті, pytest **91 passed**, coverage 95.56%.
 
 ## R2 Цикл 2 — безпека/авторизація (+ новий media-роут, SIMPLE_JWT)
 _(заповнюється)_

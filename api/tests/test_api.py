@@ -6,9 +6,10 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from orders.models import CartItem, Order
+from orders.models import CartItem, Order, OrderItem
 from products.models import Product
 from products.tests.factories import ProductFactory
+from reviews.models import Review
 from users.models import User
 from users.tests.factories import UserFactory
 
@@ -185,6 +186,31 @@ def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
         reverse("api:product-reviews", args=[product.pk]), {"rating": 5, "comment": "x"}
     )
     assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_api_order_by_sold_not_inflated_by_reviews(api: APIClient) -> None:
+    buyer = cast(User, UserFactory())
+    bestseller = cast(Product, ProductFactory(name="Bestseller"))
+    reviewed = cast(Product, ProductFactory(name="Reviewed"))
+    order = Order.objects.create(
+        user=buyer,
+        status=Order.Status.PAID,
+        full_name="b",
+        email="b@e.com",
+        phone="1",
+        shipping_address="a",
+        total_price=Decimal("1"),
+    )
+    OrderItem.objects.create(order=order, product=bestseller, quantity=10, price=Decimal("1"))
+    OrderItem.objects.create(order=order, product=reviewed, quantity=4, price=Decimal("1"))
+    for _ in range(3):
+        Review.objects.create(
+            product=reviewed, user=cast(User, UserFactory()), rating=5, comment="x"
+        )
+    resp = api.get(reverse("api:product-list"), {"ordering": "-sold"})
+    names = [p["name"] for p in resp.data["results"]]
+    assert names.index("Bestseller") < names.index("Reviewed")
 
 
 @pytest.mark.django_db
