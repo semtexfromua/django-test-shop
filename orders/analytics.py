@@ -20,7 +20,7 @@ def order_count() -> int:
 
 def orders_by_status() -> dict[str, int]:
     rows = Order.objects.values("status").annotate(n=Count("id"))
-    return {row["status"]: row["n"] for row in rows}
+    return {Order.Status(row["status"]).label: row["n"] for row in rows}
 
 
 def top_products(limit: int = 5) -> list[dict[str, Any]]:

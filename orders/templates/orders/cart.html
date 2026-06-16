@@ -3,7 +3,6 @@
 {% block content %}
 <div class="container account-page">
   <h1>Кошик</h1>
-  {% for m in messages %}<p class="message">{{ m }}</p>{% endfor %}
   {% if cart|length %}
   <table class="cart-table">
     <thead><tr><th>Товар</th><th>Ціна</th><th>К-сть</th><th>Сума</th><th></th></tr></thead>
