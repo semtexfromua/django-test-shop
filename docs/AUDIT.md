@@ -3,9 +3,10 @@
 Багатоцикловий аудит: 5 циклів `рев'ю → фікс → verify → commit`, далі spec-gap перевірка,
 далі повний Playwright-прохід. Працюю автономно, поки є відкриті пункти.
 
-**Статус: РАУНД 2 IN PROGRESS** (раунд 1 завершено нижче). Раунд 1: 5 циклів + spec-gap + Playwright, 90 тестів, coverage 95.56%, ruff/mypy чисті.
+**Статус: РАУНД 2 ЗАВЕРШЕНО** ✅ Раунд 1: 5 циклів + spec-gap + Playwright, 90 тестів. Раунд 2: 5 циклів, фікс Medium+, **98 тестів**, coverage 95.64%, ruff/mypy чисті.
 
-Раунд 2 (нижче, секція «## Раунд 2»): ще 5 послідовних рев'ю-прогонів; фіксимо **Medium і вище**, Minor — лише нотатка.
+Раунд 2 (нижче): ще 5 послідовних рев'ю-прогонів; фіксимо **Medium і вище**, Minor — лише нотатка.
+Виправлено в раунді 2: API sold JOIN-інфляція (R2C1, Important) · JWT refresh replay/blacklist (R2C2, Important) · дублікати email web+API (R2C3, Medium) · GraphQL introspection у проді (R2C4, Important) · необмежена cart-quantity → 500 (R2C4, Medium). R2C5 — Medium+ не знайдено.
 
 Базовий стан перед аудитом: 80 тестів, coverage 94.93%, ruff/mypy чисті, 8 юнітів на `main`.
 
@@ -172,4 +173,23 @@ ruff/mypy чисті, pytest **95 passed**, coverage 95.56%, Playwright OK.
 ruff/mypy чисті, pytest **98 passed**, coverage 95.64%.
 
 ## R2 Цикл 5 — крос-катінг/перф/консистентність/тести
-_(заповнюється)_
+Рев'ю: інлайн (субагенти давали 529 Overloaded). Прочитано весь крос-катінг-скоуп:
+`config/settings/{base,dev,prod}.py`, `docker-compose.yml`, `Dockerfile`, `docker/entrypoint.sh`,
+`.github/workflows/ci.yml`, `pyproject.toml`, `README.md`, `.env.example`, web/API list-в'юхи, моделі.
+
+**Medium+ не знайдено** — після раунду 1 + R2 циклів 1-4 крос-катінг-шар чистий. Лише Minor:
+- ⏭️ Minor: `docker-compose.yml:24,8` — демо-дефолти `SECRET_KEY=dev-insecure-key-change-me` і `POSTGRES_PASSWORD=postgres` (web стартує на `prod`-сетінгах). Свідомо для локального demo (HTTP, localhost); для реального деплою обов'язково override (вказано в `.env.example:3`). Прибрати дефолт = зламати `docker compose up --build` зі швидкого старту → лишаємо + документовано.
+- ⏭️ Minor: `README.md:20` — GraphiQL-URL у «Швидкому старті (Docker)», але compose = prod (`DEBUG=False`) → браузерний GraphiQL вимкнено (POST працює). Нюанс доки.
+- ⏭️ Minor: `pyproject.toml:20` — застарілий коментар («DRF/JWT/… додамо пізніше»), а залежності вже присутні. Косметика (не чіпаю — не моя зміна).
+- ⏭️ Minor: `docker-compose.yml:25` `DEBUG` env для web ігнорується (`prod.py:8` хардкодить `DEBUG=False`) — мертвий env, нешкідливо.
+- ⏭️ Minor: немає `CSRF_TRUSTED_ORIGINS` для реального HTTPS-домену — потрібно лише для справжнього деплою за доменом; demo на localhost ок.
+
+Перевірено чистим:
+- **Конфіг/безпека:** `prod.py` вимагає `SECRET_KEY` без дефолта (fail-fast); `SECURE_SSL_REDIRECT/SESSION_COOKIE_SECURE/CSRF_COOKIE_SECURE/HSTS` через env (вимкнені для HTTP-demo, вмикаються у проді); `SECURE_PROXY_SSL_HEADER` лише за `USE_PROXY_SSL_HEADER`.
+- **Docker:** non-root (`USER app`), healthcheck на db + `depends_on: service_healthy`, entrypoint `migrate`+`collectstatic` під `set -e` перед gunicorn, named-volumes із правильним власником, multi-stage + uv `--frozen --no-dev`.
+- **CI:** гейтить на ruff+mypy+pytest (pytest має `fail_under=80`), окремий job білдить Docker-образ; postgres:16 збігається з compose; `--frozen` lockfile.
+- **Перф/N+1:** web list `select_related("category")`; detail `reviews.select_related("user")`; API `ProductViewSet` select_related+annotate, `OrderViewSet` `prefetch_related("items__product")`, `CartItemViewSet` select_related; analytics через `values().annotate()`. Індекси: `slug` unique, FK `category` індексований — критичних пропусків нема для масштабу навч-проєкту.
+- **Тести:** критичні шляхи покриті змістовно — `create_order`/insufficient-stock-rollback, `cancel_order` (restore stock + ідемпотентність), payment, owner-isolation, JWT-rotation, email-uniqueness, introspection. README-команди (`seed_catalog`, `setup_roles`) реально існують.
+
+### Результат
+ruff/mypy чисті, pytest **98 passed**, coverage 95.64%. Код не змінювався (нема Medium+).
