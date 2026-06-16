@@ -46,7 +46,8 @@ class Cart:
             }
 
     def __len__(self) -> int:
-        return sum(self._cart.values())
+        # через __iter__ (фільтрує наявні товари) — узгоджено з total()
+        return sum(item["quantity"] for item in self)
 
     def total(self) -> Decimal:
         products = Product.objects.filter(pk__in=self._cart.keys())

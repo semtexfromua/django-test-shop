@@ -69,7 +69,7 @@ curl -X POST localhost:8000/api/orders/ -H 'Authorization: Bearer <access>' \
 curl -X POST localhost:8000/api/users/refresh/ \
   -H 'Content-Type: application/json' -d '{"refresh":"<refresh>"}'
 ```
-Повна схема — `/api/docs/` (Swagger) та `/api/schema/` (OpenAPI 3).
+**Токени:** access живе 30 хв, refresh — 1 день; при оновленні refresh ротується. Повна схема — `/api/docs/` (Swagger) та `/api/schema/` (OpenAPI 3).
 
 ## GraphQL (бонус, аналітика — лише для персоналу)
 `POST /graphql/` (або GraphiQL у браузері):

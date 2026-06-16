@@ -42,6 +42,11 @@
 </header>
 
 <main class="{% block main_class %}{% endblock %}">
+    {% if messages %}
+    <div class="container messages">
+        {% for m in messages %}<p class="message message--{{ m.tags }}">{{ m }}</p>{% endfor %}
+    </div>
+    {% endif %}
     {% block content %}{% endblock %}
 </main>
 

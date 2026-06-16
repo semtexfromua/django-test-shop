@@ -61,3 +61,13 @@ def test_cart_clear(http_request: HttpRequest) -> None:
     cart.add(product, 1)
     cart.clear()
     assert len(cart) == 0
+
+
+@pytest.mark.django_db
+def test_cart_len_consistent_when_product_deleted(http_request: HttpRequest) -> None:
+    product = cast(Product, ProductFactory(price=Decimal("10.00")))
+    cart = Cart(http_request)
+    cart.add(product, 3)
+    product.delete()  # товар без замовлень можна видалити
+    assert len(cart) == 0  # узгоджено з __iter__/total (без застарілого лічильника)
+    assert cart.total() == Decimal("0")

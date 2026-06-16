@@ -15,7 +15,9 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Довіряти X-Forwarded-Proto лише коли реально стоїть TLS-проксі (вмикається через env).
+if env.bool("USE_PROXY_SSL_HEADER", default=False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # HTTPS-хардненг. Дефолти вимкнені, бо локальний docker compose працює по HTTP;
 # у реальному деплої за TLS-проксі вмикаються через env.

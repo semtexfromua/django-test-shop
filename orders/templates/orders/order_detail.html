@@ -2,7 +2,6 @@
 {% block title %}Замовлення #{{ order.pk }} | Hop &amp; Barley{% endblock %}
 {% block content %}
 <div class="container account-page">
-  {% for m in messages %}<p class="message">{{ m }}</p>{% endfor %}
   <h1>Замовлення #{{ order.pk }}</h1>
   <p>Статус: <strong>{{ order.get_status_display }}</strong></p>
   <table class="cart-table">
