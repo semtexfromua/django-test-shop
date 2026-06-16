@@ -6,7 +6,7 @@ import pytest
 from django.test import Client, RequestFactory
 from django.urls import reverse
 
-from products.models import Category
+from products.models import Category, Product
 from products.tests.factories import CategoryFactory, ProductFactory
 from products.views import ProductListView
 
@@ -78,3 +78,24 @@ def test_catalog_queryset_avoids_n_plus_one(django_assert_num_queries: Any) -> N
         products = list(view.get_queryset())
         _ = [p.category.name for p in products]
     assert len(products) == 3
+
+
+@pytest.mark.django_db
+def test_detail_active_product_200(client: Client) -> None:
+    product = cast(Product, ProductFactory(name="Cascade Hops", is_active=True))
+    resp = client.get(product.get_absolute_url())
+    assert resp.status_code == 200
+    assert resp.context["product"] == product
+
+
+@pytest.mark.django_db
+def test_detail_inactive_product_404(client: Client) -> None:
+    product = cast(Product, ProductFactory(is_active=False))
+    resp = client.get(product.get_absolute_url())
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_detail_missing_slug_404(client: Client) -> None:
+    resp = client.get(reverse("products:detail", kwargs={"slug": "nope"}))
+    assert resp.status_code == 404
