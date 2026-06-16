@@ -214,6 +214,23 @@ def test_api_order_by_sold_not_inflated_by_reviews(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_old_refresh_token_blacklisted_after_rotation(api: APIClient) -> None:
+    api.post(
+        reverse("api:register"),
+        {"username": "rot", "email": "rot@e.com", "password": "Br3wMaster!99"},
+    )
+    login = api.post(
+        reverse("api:token_obtain_pair"), {"username": "rot", "password": "Br3wMaster!99"}
+    )
+    old_refresh = login.data["refresh"]
+    rotated = api.post(reverse("api:token_refresh"), {"refresh": old_refresh})
+    assert rotated.status_code == 200
+    # повторне використання старого refresh після ротації — заборонено (replay)
+    replay = api.post(reverse("api:token_refresh"), {"refresh": old_refresh})
+    assert replay.status_code == 401
+
+
+@pytest.mark.django_db
 def test_schema_and_docs(api: APIClient) -> None:
     assert api.get(reverse("api:schema")).status_code == 200
     assert api.get(reverse("api:docs")).status_code == 200

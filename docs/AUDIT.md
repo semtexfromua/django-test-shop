@@ -134,7 +134,16 @@ ruff/mypy чисті, pytest **90 passed**, coverage 95.56%.
 ruff/mypy чисті, pytest **91 passed**, coverage 95.56%.
 
 ## R2 Цикл 2 — безпека/авторизація (+ новий media-роут, SIMPLE_JWT)
-_(заповнюється)_
+Рев'ю: 1 адверсаріальний субагент-безпека, відтворення емпіричне (replay-запити, path-traversal).
+
+- ✅ 🟠 (Important) JWT refresh **replay**: `ROTATE_REFRESH_TOKENS=True`, але без `BLACKLIST_AFTER_ROTATION` і без застосунку `token_blacklist` → старий refresh лишався валідним до кінця TTL (1 день) навіть після ротації (відтворено: повтор старого refresh → 200). Фікс: додано `rest_framework_simplejwt.token_blacklist` в INSTALLED_APPS + `BLACKLIST_AFTER_ROTATION=True` + міграції. +тест (повтор старого refresh → 401).
+- ✅ media-роут (`re_path … serve`) у всіх середовищах — перевірено на path-traversal: Django `safe_join` блокує `../`, відтворити не вдалося → **безпечно** (лишаємо).
+- ⏭️ Minor (нотатка): prod HTTPS-хардненinг (`SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, HSTS) вимкнені за замовчуванням — прийнятно для навч-проєкту, вмикається через env у prod.
+- ⏭️ Minor (нотатка): dev `SECRET_KEY` (default `dev-insecure-key-change-me`, 26 байт) дає `InsecureKeyLengthWarning` при HS256 — лише dev-дефолт, у prod ключ із env.
+- Перевірено чистим: owner-isolation (order/cart 404 для чужого), read-only ProductViewSet (405 на запис), reviews лише після покупки (403), `IsOwner`, JWT-auth на захищених ендпоінтах.
+
+### Результат
+ruff/mypy чисті, pytest **92 passed**, coverage 95.56%.
 
 ## R2 Цикл 3 — веб UI/шаблони (+ order-filter, popularity, messages)
 _(заповнюється)_
