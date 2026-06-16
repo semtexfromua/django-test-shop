@@ -4,7 +4,7 @@ from typing import Any, cast
 from django.db import transaction
 from django.db.models import Avg, QuerySet
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -78,8 +78,18 @@ class CartItemViewSet(viewsets.ModelViewSet):
         )
         serializer.instance = item
 
+    def perform_update(self, serializer: Any) -> None:
+        # на існуючій позиції змінюємо лише кількість; товар фіксований (інакше unique 500)
+        serializer.save(product=serializer.instance.product)
 
-class OrderViewSet(viewsets.ModelViewSet):
+
+class OrderViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    # без update/destroy: оплачене замовлення не редагують/видаляють через API
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, IsOwner]
 

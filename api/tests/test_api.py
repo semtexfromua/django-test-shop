@@ -97,6 +97,41 @@ def test_orders_owner_isolation(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_order_update_delete_not_allowed(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    order = Order.objects.create(
+        user=user,
+        status=Order.Status.PAID,
+        full_name="o",
+        email="o@e.com",
+        phone="1",
+        shipping_address="a",
+        total_price=Decimal("1"),
+    )
+    url = reverse("api:order-detail", args=[order.pk])
+    assert api.patch(url, {"phone": "x"}).status_code == 405
+    assert api.delete(url).status_code == 405
+
+
+@pytest.mark.django_db
+def test_cart_update_product_swap_no_500(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    p1 = cast(Product, ProductFactory(stock=5))
+    p2 = cast(Product, ProductFactory(stock=5))
+    item1 = CartItem.objects.create(user=user, product=p1, quantity=1)
+    CartItem.objects.create(user=user, product=p2, quantity=1)
+    resp = api.patch(
+        reverse("api:cart-detail", args=[item1.pk]), {"product": p2.pk, "quantity": 3}
+    )
+    assert resp.status_code == 200
+    item1.refresh_from_db()
+    assert item1.product_id == p1.pk  # товар не змінився
+    assert item1.quantity == 3
+
+
+@pytest.mark.django_db
 def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
     user = cast(User, UserFactory())
     api.force_authenticate(user=user)
