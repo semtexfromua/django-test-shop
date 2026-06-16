@@ -1,30 +1,40 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{{ product.name }} | Hop &amp; Barley{% endblock %}
+{% block main_class %}page-product{% endblock %}
 {% block content %}
-<div class="container product-detail">
-    <div class="product-detail__media">
-        {% if product.image %}
-        <img src="{{ product.image.url }}" alt="{{ product.name }}">
-        {% else %}
-        <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}">
-        {% endif %}
-    </div>
+<div class="container">
+    <section class="product-details-section">
+        <div class="product-image-container">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+            {% else %}
+            <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-image">
+            {% endif %}
+        </div>
+        <div class="product-info-column">
+            <div class="product-title-price">
+                <h1 class="product-name">{{ product.name }}</h1>
+                <div class="price-section">
+                    <span class="price-tag">{{ product.category.name }}</span>
+                    <p class="product-price">${{ product.price }}</p>
+                </div>
+            </div>
+            <div class="product-description">{{ product.description|linebreaks }}</div>
+            <div class="cart-controls">
+                {# TODO(orders/cart unit): зробити кнопку робочою + лічильник кількості #}
+                <button type="button" class="button button--primary add-to-cart-button" disabled>
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Додати в кошик</span>
+                </button>
+            </div>
+        </div>
+    </section>
 
-    <div class="product-detail__info">
-        <p class="product-detail__category">{{ product.category.name }}</p>
-        <h1 class="product-detail__name">{{ product.name }}</h1>
-        <p class="product-detail__price">${{ product.price }}</p>
-        <div class="product-detail__description">{{ product.description|linebreaks }}</div>
-
-        {# TODO(orders/cart unit): зробити робочою кнопку «додати в кошик» #}
-        <button type="button" class="button button--primary" disabled>Додати в кошик</button>
-    </div>
-
-    {# TODO(reviews unit): сюди прийде секція відгуків із рейтингами #}
-    <section class="product-detail__reviews">
-        <h2>Відгуки</h2>
-        <p>Скоро.</p>
+    <section class="reviews-section">
+        <h2 class="reviews-title">Відгуки</h2>
+        {# TODO(reviews unit): сюди прийдуть .review-card з рейтингами та формою відгуку #}
+        <p>Відгуків поки немає.</p>
     </section>
 </div>
 {% endblock %}
