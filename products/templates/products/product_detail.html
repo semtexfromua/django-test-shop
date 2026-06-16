@@ -21,13 +21,14 @@
                 </div>
             </div>
             <div class="product-description">{{ product.description|linebreaks }}</div>
-            <div class="cart-controls">
-                {# TODO(orders/cart unit): зробити кнопку робочою + лічильник кількості #}
-                <button type="button" class="button button--primary add-to-cart-button" disabled>
+            <form class="cart-controls" method="post" action="{% url 'orders:cart_add' product.id %}">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="Input">
+                <button type="submit" class="button button--primary add-to-cart-button">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span>Додати в кошик</span>
                 </button>
-            </div>
+            </form>
         </div>
     </section>
 

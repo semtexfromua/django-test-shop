@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Кошик | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container account-page">
+  <h1>Кошик</h1>
+  {% for m in messages %}<p class="message">{{ m }}</p>{% endfor %}
+  {% if cart|length %}
+  <table class="cart-table">
+    <thead><tr><th>Товар</th><th>Ціна</th><th>К-сть</th><th>Сума</th><th></th></tr></thead>
+    <tbody>
+    {% for item in cart %}
+      <tr>
+        <td><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></td>
+        <td>${{ item.price }}</td>
+        <td>
+          <form method="post" action="{% url 'orders:cart_update' item.product.id %}">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="Input">
+            <button type="submit" class="button button--secondary">↻</button>
+          </form>
+        </td>
+        <td>${{ item.subtotal }}</td>
+        <td>
+          <form method="post" action="{% url 'orders:cart_remove' item.product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="button button--secondary">×</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="cart-total"><strong>Разом: ${{ cart.total }}</strong></p>
+  {# checkout url з'являється на Stage 5 #}
+  <a href="/checkout/" class="button button--primary">Оформити замовлення</a>
+  {% else %}
+  <p>Кошик порожній. <a href="{% url 'products:list' %}">До каталогу</a></p>
+  {% endif %}
+</div>
+{% endblock %}
