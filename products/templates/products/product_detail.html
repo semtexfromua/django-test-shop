@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container product-detail">
+    <div class="product-detail__media">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+        <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}">
+        {% endif %}
+    </div>
+
+    <div class="product-detail__info">
+        <p class="product-detail__category">{{ product.category.name }}</p>
+        <h1 class="product-detail__name">{{ product.name }}</h1>
+        <p class="product-detail__price">${{ product.price }}</p>
+        <div class="product-detail__description">{{ product.description|linebreaks }}</div>
+
+        {# TODO(orders/cart unit): зробити робочою кнопку «додати в кошик» #}
+        <button type="button" class="button button--primary" disabled>Додати в кошик</button>
+    </div>
+
+    {# TODO(reviews unit): сюди прийде секція відгуків із рейтингами #}
+    <section class="product-detail__reviews">
+        <h2>Відгуки</h2>
+        <p>Скоро.</p>
+    </section>
+</div>
+{% endblock %}
