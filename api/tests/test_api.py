@@ -168,6 +168,17 @@ def test_cart_rejects_zero_quantity(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_cart_rejects_excessive_quantity(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory(stock=5))
+    # величезна кількість має відсіктись серіалізатором (400), а не впасти в DataError (500)
+    resp = api.post(reverse("api:cart-list"), {"product": product.pk, "quantity": 10_000_000_000})
+    assert resp.status_code == 400
+    assert CartItem.objects.filter(user=user).count() == 0
+
+
+@pytest.mark.django_db
 def test_cart_owner_isolation(api: APIClient) -> None:
     owner = cast(User, UserFactory())
     other = cast(User, UserFactory())

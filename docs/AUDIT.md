@@ -159,7 +159,17 @@ ruff/mypy чисті, pytest **92 passed**, coverage 95.56%.
 ruff/mypy чисті, pytest **95 passed**, coverage 95.56%, Playwright OK.
 
 ## R2 Цикл 4 — API/цілісність (+ sold-ordering, CheckConstraint, міграція 0003)
-_(заповнюється)_
+Рев'ю: 1 адверсаріальний субагент (API/concurrency/GraphQL), відтворення емпіричне.
+
+- ✅ 🟠 (Important) **GraphQL introspection** увімкнено у проді: `graphiql=settings.DEBUG` НЕ вимикає introspection → анонім `{ __schema {...} }` бачить повну схему (revenue/orderCount/topProducts). Дані не течуть (кожен резолвер має `_require_staff`), але це структурно крихко (новий резолвер без гейту одразу протікає) + анонімна compute-поверхня. Фікс: `graphql_validation_rules()` додає `NoSchemaIntrospectionCustomRule` коли `not DEBUG` (dev лишає GraphiQL). +2 тести (dev дозволяє, prod блокує `__schema`, звичайний запит проходить).
+- ✅ 🟡 (Medium) `CartItemSerializer.quantity` мав лише `min_value=1`, без верхньої межі → `quantity=9999999999` проходить серіалізатор → `update_or_create` падає в `DataError`/500 (понад `integer`-діапазон) замість чистого 400. Фікс: `max_value=10_000`. +тест (величезна к-сть → 400, кошик порожній).
+- ⏭️ Minor: на cart/API-шарі немає валідації `quantity` проти `stock` (oversell коректно ловиться у `create_order` із роллбеком — це лише пізній фідбек, не цілісність).
+- ⏭️ Minor: немає DRF-throttling (`DEFAULT_THROTTLE_CLASSES`) — register/login/order без rate-limit; прийнятно для навч-проєкту.
+- ⏭️ Minor: `process_payment` не ідемпотентний (`OneToOne` → повторний виклик = IntegrityError) — недосяжно через API (1 виклик на замовлення в atomic), латентно.
+- Перевірено чистим (ключове): **lock проти oversell** — `select_for_update` у `create_order` тримається до коміту зовнішньої atomic (`OrderViewSet.create`), два паралельні чекаути серіалізуються коректно, вікна перепродажу немає; insufficient-stock роллбек (Order=0/Payment=0/кошик цілий); price-snapshot і `total_price`; mass-assignment (`status/total_price/price/user` read-only або не в `fields`); owner-isolation (cart/order 404 чужому); reviewer лише після покупки (403); inactive-товар через API (`.active()` + лок `is_active=True`); ordering/filter — allow-list; page_size не збільшити (нема `page_size_query_param`); GraphQL data-authz (усі резолвери `_require_staff`, `top_products` clamp limit≤100).
+
+### Результат
+ruff/mypy чисті, pytest **98 passed**, coverage 95.64%.
 
 ## R2 Цикл 5 — крос-катінг/перф/консистентність/тести
 _(заповнюється)_
