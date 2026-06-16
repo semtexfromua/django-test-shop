@@ -66,6 +66,8 @@ def cart_remove(request: HttpRequest, product_id: int) -> HttpResponse:
 
 
 class CheckoutView(LoginRequiredMixin, FormView):
+    """Оформлення: створює замовлення з кошика й проводить оплату в одній транзакції."""
+
     template_name = "orders/checkout.html"
     form_class = OrderForm
 
@@ -122,6 +124,8 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
 
 class AnalyticsDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """Staff-дашборд: виторг, к-сть замовлень за статусами, топ-товари."""
+
     template_name = "orders/analytics.html"
 
     def test_func(self) -> bool:

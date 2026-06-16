@@ -40,6 +40,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             Product.objects.active()
             .select_related("category")
             .annotate(avg_rating=Avg("reviews__rating"))
+            .order_by("-created_at")
         )
 
 
@@ -89,6 +90,8 @@ class OrderViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
+    """Замовлення користувача: список/деталі (лише свої) + створення з БД-кошика."""
+
     # без update/destroy: оплачене замовлення не редагують/видаляють через API
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, IsOwner]

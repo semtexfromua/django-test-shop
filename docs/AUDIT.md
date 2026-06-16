@@ -70,7 +70,22 @@ ruff/mypy чисті, pytest **87 passed**, coverage 95.26%.
 ---
 
 ## Цикл 5 — Крос-катінг / консистентність / конфіг / тести
-_(settings, Docker, якість тестів, мертвий код, узгодженість)_
+Рев'ю: 2 субагенти (config/Docker/CI + тести/мертвий код/консистентність).
+
+### Знахідки
+- ✅ 🟠 (MEDIUM) Завантажена media не віддавалась у прод-Docker (роут під DEBUG; WhiteNoise лише static; нема проксі) → фото товарів 404. Фікс: media-роут через `django.views.static.serve` у всіх середовищах (+коментар про nginx/CDN для реального проду).
+- ✅ 🟠 (HIGH-тест) API-checkout oversell-rollback не покривався тестом. Фікс: +тест (stock=1, кошик 5 → 400, order/payment=0, кошик не очищено, stock незмінний).
+- ✅ 🟡 Мертвий `CategorySerializer` (api) — видалено. Мертвий `static/js/main.js` (229 рядків, конфліктна клієнт-логіка) — видалено.
+- ✅ 🟡 `SECURE_PROXY_SSL_HEADER` довірявся без проксі → env-gated (`USE_PROXY_SSL_HEADER`).
+- ✅ 🟡 Нема docstrings на ключових view-класах (ТЗ) → додано (ProductListView/RegisterView/CheckoutView/AnalyticsDashboardView/OrderViewSet/ReviewCreateView).
+- ✅ 🟡 `UnorderedObjectListWarning` у пагінації API-продуктів → явний `.order_by("-created_at")`.
+- ✅ 🟡 CI-крок «lint + format» не перевіряв формат → перейменовано на «lint + isort» (чесно). Масовий `ruff format` (64 файли) НЕ застосовано — рестайл робочого коду поза surgical-changes.
+- ⏭️ 🟡 review `IntegrityError`-гілка (гонка) без тесту — важко без concurrency-симуляції; БД-констрейнт гарантує цілісність. Відкладено.
+- ⏭️ 🟡 `Order.user` CASCADE, `cart_update` stock==0 UX — дизайн/мінор, відкладено.
+- Перевірено чистим: settings split, Docker (multi-stage/non-root/lock/entrypoint), `check --deploy`, `uv lock --check`, міграції, deps split, .gitignore/.env, owner-isolation/JWT/oversell тести змістовні, фабрики валідні, ruff F-rules чисто.
+
+### Результат
+ruff/mypy чисті, pytest **88 passed**, coverage 95.48%.
 
 ---
 

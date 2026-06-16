@@ -132,6 +132,32 @@ def test_cart_update_product_swap_no_500(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_api_order_insufficient_stock_rolls_back(api: APIClient) -> None:
+    from payments.models import Payment
+
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory(price=Decimal("10.00"), stock=1))
+    CartItem.objects.create(user=user, product=product, quantity=5)
+    resp = api.post(
+        reverse("api:order-list"),
+        {
+            "full_name": "B",
+            "email": "b@e.com",
+            "phone": "1",
+            "shipping_address": "a",
+            "method": "card",
+        },
+    )
+    assert resp.status_code == 400
+    assert Order.objects.count() == 0
+    assert Payment.objects.count() == 0
+    assert CartItem.objects.filter(user=user).count() == 1  # кошик не очищено
+    product.refresh_from_db()
+    assert product.stock == 1
+
+
+@pytest.mark.django_db
 def test_cart_rejects_zero_quantity(api: APIClient) -> None:
     user = cast(User, UserFactory())
     api.force_authenticate(user=user)

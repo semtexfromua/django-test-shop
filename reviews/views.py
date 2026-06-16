@@ -16,6 +16,8 @@ from .services import can_review
 
 
 class ReviewCreateView(LoginRequiredMixin, View):
+    """Створення відгуку — лише після покупки товару (один раз на товар)."""
+
     def _product(self) -> Product:
         return get_object_or_404(Product.objects.active(), slug=self.kwargs["slug"])
 

@@ -5,15 +5,9 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from orders.models import CartItem, Order, OrderItem
-from products.models import Category, Product
+from products.models import Product
 from reviews.models import Review
 from users.models import User
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ("id", "name", "slug", "parent")
 
 
 class ProductSerializer(serializers.ModelSerializer):

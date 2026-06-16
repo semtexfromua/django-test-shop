@@ -22,6 +22,8 @@ def _parse_decimal(value: str | None) -> Decimal | None:
 
 
 class ProductListView(ListView):
+    """Каталог: активні товари з фільтрами (категорія/ціна), пошуком, сортуванням, пагінацією."""
+
     model = Product
     template_name = "products/product_list.html"
     context_object_name = "products"
