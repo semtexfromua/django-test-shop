@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Кабінет | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container account-page">
+  <h1>Мій кабінет</h1>
+  <p>Привіт, {{ user.username }}!</p>
+
+  <form class="auth-form" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="InputField">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="ButtonGroup"><button type="submit" class="button button--primary">Зберегти профіль</button></div>
+  </form>
+
+  <p><a href="{% url 'users:password_change' %}">Змінити пароль</a></p>
+  <form method="post" action="{% url 'users:logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="button button--secondary">Вийти</button>
+  </form>
+
+  <hr>
+  <h2>Історія замовлень</h2>
+  <p><a href="{% url 'orders:list' %}">Переглянути мої замовлення →</a></p>
+</div>
+{% endblock %}

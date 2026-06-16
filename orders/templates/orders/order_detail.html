@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Замовлення #{{ order.pk }} | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container account-page">
+  {% for m in messages %}<p class="message">{{ m }}</p>{% endfor %}
+  <h1>Замовлення #{{ order.pk }}</h1>
+  <p>Статус: <strong>{{ order.get_status_display }}</strong></p>
+  <table class="cart-table">
+    <thead><tr><th>Товар</th><th>Ціна</th><th>К-сть</th><th>Сума</th></tr></thead>
+    <tbody>
+    {% for item in order.items.all %}
+      <tr><td>{{ item.product.name }}</td><td>${{ item.price }}</td><td>{{ item.quantity }}</td><td>${{ item.subtotal }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="cart-total"><strong>Разом: ${{ order.total_price }}</strong></p>
+  <h2>Доставка</h2>
+  <p>{{ order.full_name }}, {{ order.phone }}<br>{{ order.shipping_address }}</p>
+  <p><a href="{% url 'orders:list' %}">← Усі замовлення</a></p>
+</div>
+{% endblock %}

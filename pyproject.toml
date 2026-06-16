@@ -1,0 +1,85 @@
+[project]
+name = "myshop"
+version = "0.1.0"
+description = "Інтернет-магазин на Django/DRF (навчальний проєкт)"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "django>=5.2,<5.3",
+    "psycopg[binary]>=3.2",
+    "django-environ>=0.12",
+    "pillow>=11.0",
+    "whitenoise>=6.8",
+    "gunicorn>=23.0",
+    "djangorestframework>=3.17.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.29.0",
+    "django-filter>=25.2",
+    "graphene-django>=3.2.3",
+]
+
+# DRF/JWT/spectacular/graphene додамо у відповідних юнітах (API, бонуси) — не раніше.
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "django-stubs[compatible-mypy]>=5.1",
+    "pytest>=8.3",
+    "pytest-django>=4.9",
+    "pytest-cov>=6.0",
+    "factory-boy>=3.3",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ", "C4", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"config/settings/*.py" = ["F403", "F405"]  # split-настройки навмисно через `import *`
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["mypy_django_plugin.main"]
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+exclude = ['migrations/']
+
+[[tool.mypy.overrides]]
+module = ["*.migrations.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["environ.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["factory.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["rest_framework.*", "rest_framework_simplejwt.*", "drf_spectacular.*", "django_filters.*", "graphene.*", "graphene_django.*", "graphql.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+python_files = ["test_*.py", "tests.py"]
+addopts = "-q --cov --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["."]
+omit = ["*/migrations/*", "*/tests/*", "config/*", "manage.py", "*/wsgi.py", "*/asgi.py"]
+
+[tool.coverage.report]
+fail_under = 80

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Оформлення | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container account-page">
+  <h1>Оформлення замовлення</h1>
+  <div class="checkout-summary">
+    <h2>Ваше замовлення</h2>
+    <ul>
+      {% for item in cart %}<li>{{ item.product.name }} × {{ item.quantity }} — ${{ item.subtotal }}</li>{% endfor %}
+    </ul>
+    <p><strong>Разом: ${{ cart.total }}</strong></p>
+  </div>
+  <form class="auth-form" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="InputField">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="ButtonGroup"><button type="submit" class="button button--primary">Підтвердити та оплатити</button></div>
+  </form>
+</div>
+{% endblock %}

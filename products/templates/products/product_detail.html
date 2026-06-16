@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} | Hop &amp; Barley{% endblock %}
+{% block main_class %}page-product{% endblock %}
+{% block content %}
+<div class="container">
+    <section class="product-details-section">
+        <div class="product-image-container">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+            {% else %}
+            <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-image">
+            {% endif %}
+        </div>
+        <div class="product-info-column">
+            <div class="product-title-price">
+                <h1 class="product-name">{{ product.name }}</h1>
+                <div class="price-section">
+                    <span class="price-tag">{{ product.category.name }}</span>
+                    <p class="product-price">${{ product.price }}</p>
+                </div>
+            </div>
+            <div class="product-description">{{ product.description|linebreaks }}</div>
+            <form class="cart-controls" method="post" action="{% url 'orders:cart_add' product.id %}">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="Input">
+                <button type="submit" class="button button--primary add-to-cart-button">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Додати в кошик</span>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <section class="reviews-section">
+        <h2 class="reviews-title">Відгуки{% if avg_rating %} — {{ avg_rating|floatformat:1 }}★{% endif %}</h2>
+        {% if user.is_authenticated %}
+        <p><a href="{% url 'reviews:create' product.slug %}" class="button button--secondary">Залишити відгук</a></p>
+        {% endif %}
+        <div class="reviews-grid">
+        {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-rating">{% for _ in ""|center:review.rating %}★{% endfor %}</div>
+                <div class="review-body"><p class="review-text">{{ review.comment }}</p></div>
+                <div class="review-author"><span class="author-name">{{ review.user.username }}</span></div>
+            </div>
+        {% empty %}
+            <p>Відгуків поки немає.</p>
+        {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
