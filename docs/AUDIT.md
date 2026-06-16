@@ -3,7 +3,10 @@
 Багатоцикловий аудит: 5 циклів `рев'ю → фікс → verify → commit`, далі spec-gap перевірка,
 далі повний Playwright-прохід. Працюю автономно, поки є відкриті пункти.
 
-**Статус: DONE** — 5 циклів рев'ю-фікс + spec-gap + повний Playwright завершені. Підсумок: 90 тестів, coverage 95.56%, ruff/mypy чисті. Закрито 2 Critical, кілька Important/Medium і рубрикові дірки ТЗ; решта (дизайн/опційне) свідомо відкладена з причинами.
+**Статус: РАУНД 2 ЗАВЕРШЕНО** ✅ Раунд 1: 5 циклів + spec-gap + Playwright, 90 тестів. Раунд 2: 5 циклів, фікс Medium+, **98 тестів**, coverage 95.64%, ruff/mypy чисті.
+
+Раунд 2 (нижче): ще 5 послідовних рев'ю-прогонів; фіксимо **Medium і вище**, Minor — лише нотатка.
+Виправлено в раунді 2: API sold JOIN-інфляція (R2C1, Important) · JWT refresh replay/blacklist (R2C2, Important) · дублікати email web+API (R2C3, Medium) · GraphQL introspection у проді (R2C4, Important) · необмежена cart-quantity → 500 (R2C4, Medium). R2C5 — Medium+ не знайдено.
 
 Базовий стан перед аудитом: 80 тестів, coverage 94.93%, ruff/mypy чисті, 8 юнітів на `main`.
 
@@ -116,3 +119,77 @@ ruff/mypy чисті, pytest **90 passed**, coverage 95.56%.
 - ✅ Логін buyer1, кошик (товар + сума + «Оформити»), add-to-cart.
 - ✅ Swagger `/api/docs/`, GraphiQL `/graphql/` (у dev) — вантажаться.
 - Регресія core-флоу (товар/checkout/оплата/відгук/admin-дашборд із попередніх юнітів) — без змін.
+
+---
+
+# Раунд 2 (повторний аудит) — фіксимо Medium+, Minor лише нотуємо
+
+## R2 Цикл 1 — коректність/бізнес-логіка (адверсаріально + код аудиту-1)
+Рев'ю: 1 адверсаріальний субагент, відтворення емпіричне.
+
+- ✅ 🟠 (Important) API `ProductViewSet`: `avg_rating=Avg(reviews)` + `sold=Sum(order_items)` на одному запиті → **JOIN-множення** (sold × к-сть відгуків) → `?ordering=sold` бреше (bestseller програє менш-продаваному з відгуками). Фікс: `sold` через `Subquery` (avg лишився коректним). +тест. Web-сорт був чистий (нема avg-join).
+- ⏭️ Minor (нотатка): `cancel_order` лишає `Payment.status=PAID` (revenue не зачеплено — фільтр за статусом замовлення); API payment `method` без валідації проти choices (data-quality; веб валідує).
+- Перевірено чистим: deactivated-mid-checkout, web popularity, top_products, order-status-фільтр, CheckConstraint(qty≥1) на всіх шляхах, `Cart.__len__`, transaction-boundaries.
+
+### Результат
+ruff/mypy чисті, pytest **91 passed**, coverage 95.56%.
+
+## R2 Цикл 2 — безпека/авторизація (+ новий media-роут, SIMPLE_JWT)
+Рев'ю: 1 адверсаріальний субагент-безпека, відтворення емпіричне (replay-запити, path-traversal).
+
+- ✅ 🟠 (Important) JWT refresh **replay**: `ROTATE_REFRESH_TOKENS=True`, але без `BLACKLIST_AFTER_ROTATION` і без застосунку `token_blacklist` → старий refresh лишався валідним до кінця TTL (1 день) навіть після ротації (відтворено: повтор старого refresh → 200). Фікс: додано `rest_framework_simplejwt.token_blacklist` в INSTALLED_APPS + `BLACKLIST_AFTER_ROTATION=True` + міграції. +тест (повтор старого refresh → 401).
+- ✅ media-роут (`re_path … serve`) у всіх середовищах — перевірено на path-traversal: Django `safe_join` блокує `../`, відтворити не вдалося → **безпечно** (лишаємо).
+- ⏭️ Minor (нотатка): prod HTTPS-хардненinг (`SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, HSTS) вимкнені за замовчуванням — прийнятно для навч-проєкту, вмикається через env у prod.
+- ⏭️ Minor (нотатка): dev `SECRET_KEY` (default `dev-insecure-key-change-me`, 26 байт) дає `InsecureKeyLengthWarning` при HS256 — лише dev-дефолт, у prod ключ із env.
+- Перевірено чистим: owner-isolation (order/cart 404 для чужого), read-only ProductViewSet (405 на запис), reviews лише після покупки (403), `IsOwner`, JWT-auth на захищених ендпоінтах.
+
+### Результат
+ruff/mypy чисті, pytest **92 passed**, coverage 95.56%.
+
+## R2 Цикл 3 — веб UI/шаблони (+ order-filter, popularity, messages)
+Рев'ю: 1 адверсаріальний субагент (веб-шар), відтворення емпіричне + Playwright.
+
+- ✅ 🟡 (Medium) **Дублікати email**: ні модель, ні `RegisterForm`/`ProfileForm`, ні API `RegisterSerializer` не перевіряли унікальність → два акаунти на одну пошту (відтворено: 2× `dup@example.com`). Email — канал сповіщень (orders), тож має бути унікальним. Модельний `unique=True` відпав (у dev-БД 3 користувачі з порожнім email → міграція впала б; data-міграція непропорційна). Фікс: `clean_email` (iexact, з guard на непорожнє) у обох формах + `validate_email` в API-серіалізаторі. +3 тести (web register, web profile-чужий-email, API). Playwright: `PWDUP@e.com` проти наявного `pwdup@e.com` → поле invalid, "Користувач з такою поштою вже існує." (регістронезалежно).
+- ⏭️ Minor: `cart.py __iter__/total` беруть `Product.objects` (не `.active()`) → деактивований товар лишається у відображенні кошика/чекауту (тільки UX/сума; продаж уже закрито `create_order`-локом `is_active=True`).
+- ⏭️ Minor: out-of-stock товар все одно показує форму "Додати в кошик" (`min=1 max=0`) — функціонально безпечно (`cart_add` капить до 0 + повідомлення), косметика.
+- ⏭️ Minor: `OrderListView` без `paginate_by` — історія замовлень на одній сторінці (не вимога спеки; стабільний `ordering` є).
+- ⏭️ Minor (повтор): `cart_update` при `stock==0` тихо no-op (вже відкладено в R1).
+- Перевірено чистим: усі POST-форми мають `{% csrf_token %}`; усі 17 web-`{% url %}` резолвляться; нема `|safe`/`mark_safe` (автоескейп → нема stored-XSS); owner-scoping `OrderList/DetailView`; `LoginRequiredMixin` на checkout/profile/review; `UserPassesTestMixin` на аналітиці; `_parse_decimal` блокує NaN/Inf; пагінація зберігає фільтри; логаут POST+CSRF.
+
+### Результат
+ruff/mypy чисті, pytest **95 passed**, coverage 95.56%, Playwright OK.
+
+## R2 Цикл 4 — API/цілісність (+ sold-ordering, CheckConstraint, міграція 0003)
+Рев'ю: 1 адверсаріальний субагент (API/concurrency/GraphQL), відтворення емпіричне.
+
+- ✅ 🟠 (Important) **GraphQL introspection** увімкнено у проді: `graphiql=settings.DEBUG` НЕ вимикає introspection → анонім `{ __schema {...} }` бачить повну схему (revenue/orderCount/topProducts). Дані не течуть (кожен резолвер має `_require_staff`), але це структурно крихко (новий резолвер без гейту одразу протікає) + анонімна compute-поверхня. Фікс: `graphql_validation_rules()` додає `NoSchemaIntrospectionCustomRule` коли `not DEBUG` (dev лишає GraphiQL). +2 тести (dev дозволяє, prod блокує `__schema`, звичайний запит проходить).
+- ✅ 🟡 (Medium) `CartItemSerializer.quantity` мав лише `min_value=1`, без верхньої межі → `quantity=9999999999` проходить серіалізатор → `update_or_create` падає в `DataError`/500 (понад `integer`-діапазон) замість чистого 400. Фікс: `max_value=10_000`. +тест (величезна к-сть → 400, кошик порожній).
+- ⏭️ Minor: на cart/API-шарі немає валідації `quantity` проти `stock` (oversell коректно ловиться у `create_order` із роллбеком — це лише пізній фідбек, не цілісність).
+- ⏭️ Minor: немає DRF-throttling (`DEFAULT_THROTTLE_CLASSES`) — register/login/order без rate-limit; прийнятно для навч-проєкту.
+- ⏭️ Minor: `process_payment` не ідемпотентний (`OneToOne` → повторний виклик = IntegrityError) — недосяжно через API (1 виклик на замовлення в atomic), латентно.
+- Перевірено чистим (ключове): **lock проти oversell** — `select_for_update` у `create_order` тримається до коміту зовнішньої atomic (`OrderViewSet.create`), два паралельні чекаути серіалізуються коректно, вікна перепродажу немає; insufficient-stock роллбек (Order=0/Payment=0/кошик цілий); price-snapshot і `total_price`; mass-assignment (`status/total_price/price/user` read-only або не в `fields`); owner-isolation (cart/order 404 чужому); reviewer лише після покупки (403); inactive-товар через API (`.active()` + лок `is_active=True`); ordering/filter — allow-list; page_size не збільшити (нема `page_size_query_param`); GraphQL data-authz (усі резолвери `_require_staff`, `top_products` clamp limit≤100).
+
+### Результат
+ruff/mypy чисті, pytest **98 passed**, coverage 95.64%.
+
+## R2 Цикл 5 — крос-катінг/перф/консистентність/тести
+Рев'ю: інлайн (субагенти давали 529 Overloaded). Прочитано весь крос-катінг-скоуп:
+`config/settings/{base,dev,prod}.py`, `docker-compose.yml`, `Dockerfile`, `docker/entrypoint.sh`,
+`.github/workflows/ci.yml`, `pyproject.toml`, `README.md`, `.env.example`, web/API list-в'юхи, моделі.
+
+**Medium+ не знайдено** — після раунду 1 + R2 циклів 1-4 крос-катінг-шар чистий. Лише Minor:
+- ⏭️ Minor: `docker-compose.yml:24,8` — демо-дефолти `SECRET_KEY=dev-insecure-key-change-me` і `POSTGRES_PASSWORD=postgres` (web стартує на `prod`-сетінгах). Свідомо для локального demo (HTTP, localhost); для реального деплою обов'язково override (вказано в `.env.example:3`). Прибрати дефолт = зламати `docker compose up --build` зі швидкого старту → лишаємо + документовано.
+- ⏭️ Minor: `README.md:20` — GraphiQL-URL у «Швидкому старті (Docker)», але compose = prod (`DEBUG=False`) → браузерний GraphiQL вимкнено (POST працює). Нюанс доки.
+- ⏭️ Minor: `pyproject.toml:20` — застарілий коментар («DRF/JWT/… додамо пізніше»), а залежності вже присутні. Косметика (не чіпаю — не моя зміна).
+- ⏭️ Minor: `docker-compose.yml:25` `DEBUG` env для web ігнорується (`prod.py:8` хардкодить `DEBUG=False`) — мертвий env, нешкідливо.
+- ⏭️ Minor: немає `CSRF_TRUSTED_ORIGINS` для реального HTTPS-домену — потрібно лише для справжнього деплою за доменом; demo на localhost ок.
+
+Перевірено чистим:
+- **Конфіг/безпека:** `prod.py` вимагає `SECRET_KEY` без дефолта (fail-fast); `SECURE_SSL_REDIRECT/SESSION_COOKIE_SECURE/CSRF_COOKIE_SECURE/HSTS` через env (вимкнені для HTTP-demo, вмикаються у проді); `SECURE_PROXY_SSL_HEADER` лише за `USE_PROXY_SSL_HEADER`.
+- **Docker:** non-root (`USER app`), healthcheck на db + `depends_on: service_healthy`, entrypoint `migrate`+`collectstatic` під `set -e` перед gunicorn, named-volumes із правильним власником, multi-stage + uv `--frozen --no-dev`.
+- **CI:** гейтить на ruff+mypy+pytest (pytest має `fail_under=80`), окремий job білдить Docker-образ; postgres:16 збігається з compose; `--frozen` lockfile.
+- **Перф/N+1:** web list `select_related("category")`; detail `reviews.select_related("user")`; API `ProductViewSet` select_related+annotate, `OrderViewSet` `prefetch_related("items__product")`, `CartItemViewSet` select_related; analytics через `values().annotate()`. Індекси: `slug` unique, FK `category` індексований — критичних пропусків нема для масштабу навч-проєкту.
+- **Тести:** критичні шляхи покриті змістовно — `create_order`/insufficient-stock-rollback, `cancel_order` (restore stock + ідемпотентність), payment, owner-isolation, JWT-rotation, email-uniqueness, introspection. README-команди (`seed_catalog`, `setup_roles`) реально існують.
+
+### Результат
+ruff/mypy чисті, pytest **98 passed**, coverage 95.64%. Код не змінювався (нема Medium+).

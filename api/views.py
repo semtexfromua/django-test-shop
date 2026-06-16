@@ -2,7 +2,7 @@
 from typing import Any, cast
 
 from django.db import transaction
-from django.db.models import Avg, QuerySet, Sum
+from django.db.models import Avg, IntegerField, OuterRef, QuerySet, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins, status, viewsets
@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from orders.models import CartItem, Order
+from orders.models import CartItem, Order, OrderItem
 from orders.services import InsufficientStock, OrderContact, create_order
 from payments.services import process_payment
 from products.models import Product
@@ -37,13 +37,18 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ["price", "created_at", "sold"]
 
     def get_queryset(self) -> QuerySet[Product]:
+        # sold через Subquery — щоб join із reviews не множив суму (JOIN-інфляція)
+        sold = Subquery(
+            OrderItem.objects.filter(product=OuterRef("pk"))
+            .values("product")
+            .annotate(total=Sum("quantity"))
+            .values("total"),
+            output_field=IntegerField(),
+        )
         return (
             Product.objects.active()
             .select_related("category")
-            .annotate(
-                avg_rating=Avg("reviews__rating"),
-                sold=Coalesce(Sum("order_items__quantity"), 0),
-            )
+            .annotate(avg_rating=Avg("reviews__rating"), sold=Coalesce(sold, 0))
             .order_by("-created_at")
         )
 

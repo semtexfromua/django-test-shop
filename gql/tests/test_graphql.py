@@ -4,8 +4,11 @@ from decimal import Decimal
 from typing import Any, cast
 
 import pytest
-from django.test import Client
+from django.test import Client, override_settings
+from graphql import parse, validate
 
+from config.urls import graphql_validation_rules
+from gql.schema import schema
 from orders.models import Order
 from users.models import User
 from users.tests.factories import UserFactory
@@ -15,6 +18,19 @@ def _gql(client: Client, query: str) -> Any:
     return client.post(
         "/graphql/", data=json.dumps({"query": query}), content_type="application/json"
     )
+
+
+@override_settings(DEBUG=True)
+def test_graphql_introspection_allowed_in_dev() -> None:
+    assert graphql_validation_rules() == []  # DEBUG=True → GraphiQL працює
+
+
+@override_settings(DEBUG=False)
+def test_graphql_introspection_disabled_in_prod() -> None:
+    rules = graphql_validation_rules()
+    gs = schema.graphql_schema
+    assert validate(gs, parse("{ __schema { types { name } } }"), rules)  # introspection блокується
+    assert not validate(gs, parse("{ revenue }"), rules)  # звичайний запит проходить
 
 
 @pytest.mark.django_db

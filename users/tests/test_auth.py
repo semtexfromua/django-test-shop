@@ -79,6 +79,35 @@ def test_login_invalid_shows_error(client: Client) -> None:
 
 
 @pytest.mark.django_db
+def test_register_rejects_duplicate_email(client: Client) -> None:
+    User.objects.create_user(username="orig", email="dup@e.com", password="Str0ngPwd!23")
+    resp = client.post(
+        reverse("users:register"),
+        {
+            "username": "newbie",
+            "email": "DUP@e.com",  # порівняння без урахування регістру
+            "password1": "Str0ngPwd!23",
+            "password2": "Str0ngPwd!23",
+        },
+    )
+    assert resp.status_code == 200  # форма перерендерюється з помилкою
+    assert not User.objects.filter(username="newbie").exists()
+
+
+@pytest.mark.django_db
+def test_profile_rejects_other_users_email(client: Client) -> None:
+    User.objects.create_user(username="taken", email="taken@e.com", password="Str0ngPwd!23")
+    User.objects.create_user(username="grace", email="grace@e.com", password="Str0ngPwd!23")
+    client.login(username="grace", password="Str0ngPwd!23")
+    resp = client.post(
+        reverse("users:profile"),
+        {"first_name": "G", "last_name": "", "email": "taken@e.com"},
+    )
+    assert resp.status_code == 200  # помилка валідації
+    assert User.objects.get(username="grace").email == "grace@e.com"  # не змінилось
+
+
+@pytest.mark.django_db
 def test_profile_edit_ignores_non_form_fields(client: Client) -> None:
     User.objects.create_user(username="erin", password="Str0ngPwd!23")
     client.login(username="erin", password="Str0ngPwd!23")

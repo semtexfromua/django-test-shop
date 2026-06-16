@@ -53,7 +53,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.active())
     product_name = serializers.StringRelatedField(source="product", read_only=True)
-    quantity = serializers.IntegerField(min_value=1)
+    quantity = serializers.IntegerField(min_value=1, max_value=10_000)
 
     class Meta:
         model = CartItem
@@ -67,6 +67,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "email", "password")
+
+    def validate_email(self, value: str) -> str:
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Користувач з такою поштою вже існує.")
+        return value
 
     def create(self, validated_data: dict[str, Any]) -> User:
         return User.objects.create_user(**validated_data)

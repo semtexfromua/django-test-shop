@@ -6,9 +6,10 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from orders.models import CartItem, Order
+from orders.models import CartItem, Order, OrderItem
 from products.models import Product
 from products.tests.factories import ProductFactory
+from reviews.models import Review
 from users.models import User
 from users.tests.factories import UserFactory
 
@@ -167,6 +168,17 @@ def test_cart_rejects_zero_quantity(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_cart_rejects_excessive_quantity(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory(stock=5))
+    # величезна кількість має відсіктись серіалізатором (400), а не впасти в DataError (500)
+    resp = api.post(reverse("api:cart-list"), {"product": product.pk, "quantity": 10_000_000_000})
+    assert resp.status_code == 400
+    assert CartItem.objects.filter(user=user).count() == 0
+
+
+@pytest.mark.django_db
 def test_cart_owner_isolation(api: APIClient) -> None:
     owner = cast(User, UserFactory())
     other = cast(User, UserFactory())
@@ -188,9 +200,62 @@ def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_api_order_by_sold_not_inflated_by_reviews(api: APIClient) -> None:
+    buyer = cast(User, UserFactory())
+    bestseller = cast(Product, ProductFactory(name="Bestseller"))
+    reviewed = cast(Product, ProductFactory(name="Reviewed"))
+    order = Order.objects.create(
+        user=buyer,
+        status=Order.Status.PAID,
+        full_name="b",
+        email="b@e.com",
+        phone="1",
+        shipping_address="a",
+        total_price=Decimal("1"),
+    )
+    OrderItem.objects.create(order=order, product=bestseller, quantity=10, price=Decimal("1"))
+    OrderItem.objects.create(order=order, product=reviewed, quantity=4, price=Decimal("1"))
+    for _ in range(3):
+        Review.objects.create(
+            product=reviewed, user=cast(User, UserFactory()), rating=5, comment="x"
+        )
+    resp = api.get(reverse("api:product-list"), {"ordering": "-sold"})
+    names = [p["name"] for p in resp.data["results"]]
+    assert names.index("Bestseller") < names.index("Reviewed")
+
+
+@pytest.mark.django_db
+def test_old_refresh_token_blacklisted_after_rotation(api: APIClient) -> None:
+    api.post(
+        reverse("api:register"),
+        {"username": "rot", "email": "rot@e.com", "password": "Br3wMaster!99"},
+    )
+    login = api.post(
+        reverse("api:token_obtain_pair"), {"username": "rot", "password": "Br3wMaster!99"}
+    )
+    old_refresh = login.data["refresh"]
+    rotated = api.post(reverse("api:token_refresh"), {"refresh": old_refresh})
+    assert rotated.status_code == 200
+    # повторне використання старого refresh після ротації — заборонено (replay)
+    replay = api.post(reverse("api:token_refresh"), {"refresh": old_refresh})
+    assert replay.status_code == 401
+
+
+@pytest.mark.django_db
 def test_schema_and_docs(api: APIClient) -> None:
     assert api.get(reverse("api:schema")).status_code == 200
     assert api.get(reverse("api:docs")).status_code == 200
+
+
+@pytest.mark.django_db
+def test_register_rejects_duplicate_email(api: APIClient) -> None:
+    UserFactory(email="dup@e.com")
+    resp = api.post(
+        reverse("api:register"),
+        {"username": "newbie", "email": "DUP@e.com", "password": "Br3wMaster!99"},
+    )
+    assert resp.status_code == 400
+    assert "email" in resp.data
 
 
 @pytest.mark.django_db
