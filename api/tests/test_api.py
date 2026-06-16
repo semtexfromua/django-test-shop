@@ -1,4 +1,4 @@
-"""Тести REST API."""
+"""REST API tests."""
 from decimal import Decimal
 from typing import cast
 
@@ -128,7 +128,7 @@ def test_cart_update_product_swap_no_500(api: APIClient) -> None:
     )
     assert resp.status_code == 200
     item1.refresh_from_db()
-    assert item1.product_id == p1.pk  # товар не змінився
+    assert item1.product_id == p1.pk  # product unchanged
     assert item1.quantity == 3
 
 
@@ -153,7 +153,7 @@ def test_api_order_insufficient_stock_rolls_back(api: APIClient) -> None:
     assert resp.status_code == 400
     assert Order.objects.count() == 0
     assert Payment.objects.count() == 0
-    assert CartItem.objects.filter(user=user).count() == 1  # кошик не очищено
+    assert CartItem.objects.filter(user=user).count() == 1  # cart not cleared
     product.refresh_from_db()
     assert product.stock == 1
 
@@ -172,7 +172,7 @@ def test_cart_rejects_excessive_quantity(api: APIClient) -> None:
     user = cast(User, UserFactory())
     api.force_authenticate(user=user)
     product = cast(Product, ProductFactory(stock=5))
-    # величезна кількість має відсіктись серіалізатором (400), а не впасти в DataError (500)
+    # a huge quantity must be rejected by the serializer (400), not crash with DataError (500)
     resp = api.post(reverse("api:cart-list"), {"product": product.pk, "quantity": 10_000_000_000})
     assert resp.status_code == 400
     assert CartItem.objects.filter(user=user).count() == 0
@@ -236,7 +236,7 @@ def test_old_refresh_token_blacklisted_after_rotation(api: APIClient) -> None:
     old_refresh = login.data["refresh"]
     rotated = api.post(reverse("api:token_refresh"), {"refresh": old_refresh})
     assert rotated.status_code == 200
-    # повторне використання старого refresh після ротації — заборонено (replay)
+    # reusing the old refresh after rotation is forbidden (replay)
     replay = api.post(reverse("api:token_refresh"), {"refresh": old_refresh})
     assert replay.status_code == 401
 

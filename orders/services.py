@@ -1,7 +1,7 @@
-"""Бізнес-логіка створення замовлення.
+"""Order creation business logic.
 
-Свідомо НЕ залежить від payments (інакше цикл orders↔payments): оплату
-підв'язує в'юха checkout. Email надсилається тут — замовлення прийнято.
+Deliberately does NOT depend on payments (otherwise an orders↔payments cycle):
+payment is wired up by the checkout view. Email is sent here — order accepted.
 """
 from dataclasses import dataclass
 from decimal import Decimal
@@ -32,14 +32,14 @@ class InsufficientStock(Exception):
 
 
 def create_order(user: User, items: list[tuple[Product, int]], contact: OrderContact) -> Order:
-    """Атомарно: знімок цін, перевірка та списання залишків, email на commit.
+    """Atomically: price snapshot, stock check and decrement, email on commit.
 
-    Конкурентні замовлення серіалізуються рядковим ``select_for_update``;
-    тестами покрито послідовний оверселл (не паралельний).
+    Concurrent orders are serialized by row-level ``select_for_update``;
+    tests cover sequential overselling (not parallel).
     """
     with transaction.atomic():
         ids = [product.pk for product, _ in items]
-        # тільки активні: товар, деактивований після додавання в кошик, не продається
+        # active only: a product deactivated after being added to the cart is not sold
         locked = {
             p.pk: p
             for p in Product.objects.select_for_update().filter(pk__in=ids, is_active=True)
@@ -88,7 +88,7 @@ def _send_order_emails(order: Order) -> None:
 
 
 def cancel_order(order: Order) -> None:
-    """Скасовує замовлення й повертає залишки на склад (ідемпотентно)."""
+    """Cancel an order and restore stock (idempotent)."""
     if order.status == Order.Status.CANCELLED:
         return
     with transaction.atomic():

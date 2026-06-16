@@ -1,4 +1,4 @@
-"""В'юхи кошика, оформлення та замовлень."""
+"""Cart, checkout and order views."""
 from typing import Any, cast
 
 from django.contrib import messages
@@ -66,7 +66,7 @@ def cart_remove(request: HttpRequest, product_id: int) -> HttpResponse:
 
 
 class CheckoutView(LoginRequiredMixin, FormView):
-    """Оформлення: створює замовлення з кошика й проводить оплату в одній транзакції."""
+    """Checkout: creates an order from the cart and processes payment in one transaction."""
 
     template_name = "orders/checkout.html"
     form_class = OrderForm
@@ -106,7 +106,7 @@ class CheckoutView(LoginRequiredMixin, FormView):
 
 
 class OrderListView(LoginRequiredMixin, ListView):
-    """Історія замовлень користувача з фільтром за статусом."""
+    """User order history with a status filter."""
 
     template_name = "orders/order_list.html"
     context_object_name = "orders"
@@ -136,7 +136,7 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
 
 class AnalyticsDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    """Staff-дашборд: виторг, к-сть замовлень за статусами, топ-товари."""
+    """Staff dashboard: revenue, order counts by status, top products."""
 
     template_name = "orders/analytics.html"
 

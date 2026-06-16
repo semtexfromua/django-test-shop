@@ -1,4 +1,4 @@
-"""DRF viewsets та APIViews."""
+"""DRF viewsets and APIViews."""
 from typing import Any, cast
 
 from django.db import transaction
@@ -37,7 +37,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ["price", "created_at", "sold"]
 
     def get_queryset(self) -> QuerySet[Product]:
-        # sold через Subquery — щоб join із reviews не множив суму (JOIN-інфляція)
+        # sold via Subquery — so the join with reviews doesn't inflate the sum (JOIN inflation)
         sold = Subquery(
             OrderItem.objects.filter(product=OuterRef("pk"))
             .values("product")
@@ -89,7 +89,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         serializer.instance = item
 
     def perform_update(self, serializer: Any) -> None:
-        # на існуючій позиції змінюємо лише кількість; товар фіксований (інакше unique 500)
+        # on an existing item only the quantity changes; the product is fixed (otherwise unique 500)
         serializer.save(product=serializer.instance.product)
 
 
@@ -99,9 +99,9 @@ class OrderViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Замовлення користувача: список/деталі (лише свої) + створення з БД-кошика."""
+    """User orders: list/detail (own only) + creation from the DB cart."""
 
-    # без update/destroy: оплачене замовлення не редагують/видаляють через API
+    # no update/destroy: a paid order is not edited/deleted via the API
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, IsOwner]
 

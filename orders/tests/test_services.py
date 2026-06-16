@@ -1,4 +1,4 @@
-"""Тести бізнес-логіки створення замовлення."""
+"""Order creation business-logic tests."""
 from decimal import Decimal
 from typing import Any, cast
 

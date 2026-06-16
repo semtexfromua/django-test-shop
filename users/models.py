@@ -1,11 +1,11 @@
-"""Моделі застосунку users."""
+"""Users app models."""
 from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    """Кастомна модель користувача.
+    """Custom user model.
 
-    Поки що повністю повторює стандартного користувача Django, але винесена окремо
-    з першого дня: змінити `AUTH_USER_MODEL` пізніше — болісно й ризиковано, тож
-    майбутні поля (телефон, адреси тощо) додаватимемо саме сюди.
+    For now it mirrors Django's default user exactly, but is split out from day one:
+    changing `AUTH_USER_MODEL` later is painful and risky, so future fields
+    (phone, addresses, etc.) will be added right here.
     """

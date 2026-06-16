@@ -1,4 +1,4 @@
-"""Конфігурація застосунку orders."""
+"""Orders app configuration."""
 from django.apps import AppConfig
 
 

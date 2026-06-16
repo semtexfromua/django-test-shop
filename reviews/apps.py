@@ -1,4 +1,4 @@
-"""Конфігурація застосунку reviews."""
+"""Reviews app configuration."""
 from django.apps import AppConfig
 
 

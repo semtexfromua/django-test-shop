@@ -1,4 +1,4 @@
-"""Тест seed-команди каталогу."""
+"""Catalog seed command test."""
 import pytest
 from django.core.management import call_command
 

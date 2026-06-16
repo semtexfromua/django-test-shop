@@ -1,18 +1,18 @@
-"""Базові налаштування Django, спільні для всіх середовищ.
+"""Django base settings shared across all environments.
 
-Значення, що залежать від оточення (секрети, БД, email), читаються зі змінних
-середовища через `django-environ`. Локально їх можна задати у файлі `.env`.
+Environment-dependent values (secrets, DB, email) are read from environment
+variables via `django-environ`. Locally they can be set in a `.env` file.
 """
 from datetime import timedelta
 from pathlib import Path
 
 import environ
 
-# myshop/config/settings/base.py -> корінь проєкту на три рівні вище
+# config/settings/base.py -> project root is three levels up
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(DEBUG=(bool, False))
-# .env читається, лише якщо існує; у Docker змінні приходять з оточення.
+# .env is read only if it exists; in Docker the variables come from the environment.
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY", default="dev-insecure-key-change-me")
@@ -105,7 +105,7 @@ EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="shop@example.com")
 ADMINS = [("Admin", env("ADMIN_EMAIL", default="admin@example.com"))]
 
-# Авторизація (session-based для веба)
+# Auth (session-based for the web)
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "users:profile"
 LOGOUT_REDIRECT_URL = "products:list"
@@ -138,10 +138,10 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
-    # старий refresh потрапляє в чорний список після ротації — інакше його можна
-    # повторно використати до кінця TTL (replay)
+    # the old refresh token is blacklisted after rotation — otherwise it could be
+    # replayed until the end of its TTL
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-# GraphQL (бонус — аналітика)
+# GraphQL (bonus — analytics)
 GRAPHENE = {"SCHEMA": "gql.schema.schema"}

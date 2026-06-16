@@ -1,4 +1,4 @@
-"""Тести автентифікації та кабінету."""
+"""Authentication and account tests."""
 import pytest
 from django.test import Client
 from django.urls import reverse
@@ -74,7 +74,7 @@ def test_password_change(client: Client) -> None:
 def test_login_invalid_shows_error(client: Client) -> None:
     User.objects.create_user(username="frank", password="Str0ngPwd!23")
     resp = client.post(reverse("users:login"), {"username": "frank", "password": "wrong"})
-    assert resp.status_code == 200  # форма перерендерюється
+    assert resp.status_code == 200  # form re-renders
     assert "_auth_user_id" not in client.session
 
 
@@ -85,12 +85,12 @@ def test_register_rejects_duplicate_email(client: Client) -> None:
         reverse("users:register"),
         {
             "username": "newbie",
-            "email": "DUP@e.com",  # порівняння без урахування регістру
+            "email": "DUP@e.com",  # case-insensitive comparison
             "password1": "Str0ngPwd!23",
             "password2": "Str0ngPwd!23",
         },
     )
-    assert resp.status_code == 200  # форма перерендерюється з помилкою
+    assert resp.status_code == 200  # form re-renders with an error
     assert not User.objects.filter(username="newbie").exists()
 
 
@@ -103,8 +103,8 @@ def test_profile_rejects_other_users_email(client: Client) -> None:
         reverse("users:profile"),
         {"first_name": "G", "last_name": "", "email": "taken@e.com"},
     )
-    assert resp.status_code == 200  # помилка валідації
-    assert User.objects.get(username="grace").email == "grace@e.com"  # не змінилось
+    assert resp.status_code == 200  # validation error
+    assert User.objects.get(username="grace").email == "grace@e.com"  # unchanged
 
 
 @pytest.mark.django_db

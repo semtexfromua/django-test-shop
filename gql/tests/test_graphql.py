@@ -1,4 +1,4 @@
-"""Тести GraphQL-аналітики."""
+"""GraphQL analytics tests."""
 import json
 from decimal import Decimal
 from typing import Any, cast
@@ -22,15 +22,15 @@ def _gql(client: Client, query: str) -> Any:
 
 @override_settings(DEBUG=True)
 def test_graphql_introspection_allowed_in_dev() -> None:
-    assert graphql_validation_rules() == []  # DEBUG=True → GraphiQL працює
+    assert graphql_validation_rules() == []  # DEBUG=True → GraphiQL works
 
 
 @override_settings(DEBUG=False)
 def test_graphql_introspection_disabled_in_prod() -> None:
     rules = graphql_validation_rules()
     gs = schema.graphql_schema
-    assert validate(gs, parse("{ __schema { types { name } } }"), rules)  # introspection блокується
-    assert not validate(gs, parse("{ revenue }"), rules)  # звичайний запит проходить
+    assert validate(gs, parse("{ __schema { types { name } } }"), rules)  # introspection is blocked
+    assert not validate(gs, parse("{ revenue }"), rules)  # a normal query passes
 
 
 @pytest.mark.django_db

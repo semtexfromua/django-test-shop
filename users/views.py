@@ -1,4 +1,4 @@
-"""В'юхи користувачів."""
+"""User views."""
 from typing import Any, cast
 
 from django.contrib.auth import login
@@ -13,7 +13,7 @@ from .models import User
 
 
 class RegisterView(CreateView):
-    """Реєстрація з автоматичним входом після створення акаунта."""
+    """Registration with automatic login after the account is created."""
 
     form_class = RegisterForm
     template_name = "users/register.html"
