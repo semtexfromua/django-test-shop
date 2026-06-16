@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "drf_spectacular",
+    "graphene_django",
     # local
     "users",
     "products",
@@ -130,3 +131,6 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+# GraphQL (бонус — аналітика)
+GRAPHENE = {"SCHEMA": "gql.schema.schema"}
