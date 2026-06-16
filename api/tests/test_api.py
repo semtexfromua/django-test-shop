@@ -1,0 +1,113 @@
+"""Тести REST API."""
+from decimal import Decimal
+from typing import cast
+
+import pytest
+from django.urls import reverse
+from rest_framework.test import APIClient
+
+from orders.models import CartItem, Order
+from products.models import Product
+from products.tests.factories import ProductFactory
+from users.models import User
+from users.tests.factories import UserFactory
+
+
+@pytest.fixture
+def api() -> APIClient:
+    return APIClient()
+
+
+@pytest.mark.django_db
+def test_products_list_public(api: APIClient) -> None:
+    ProductFactory.create_batch(3)
+    resp = api.get(reverse("api:product-list"))
+    assert resp.status_code == 200
+    assert resp.data["count"] == 3
+
+
+@pytest.mark.django_db
+def test_products_write_not_allowed(api: APIClient) -> None:
+    resp = api.post(reverse("api:product-list"), {"name": "x"})
+    assert resp.status_code == 405  # read-only viewset
+
+
+@pytest.mark.django_db
+def test_register_then_login_returns_jwt(api: APIClient) -> None:
+    reg = api.post(
+        reverse("api:register"),
+        {"username": "u1", "email": "u1@e.com", "password": "Br3wMaster!99"},
+    )
+    assert reg.status_code == 201
+    login = api.post(
+        reverse("api:token_obtain_pair"), {"username": "u1", "password": "Br3wMaster!99"}
+    )
+    assert login.status_code == 200
+    assert "access" in login.data
+    assert "refresh" in login.data
+
+
+@pytest.mark.django_db
+def test_orders_require_auth(api: APIClient) -> None:
+    assert api.get(reverse("api:order-list")).status_code == 401
+
+
+@pytest.mark.django_db
+def test_cart_and_order_flow(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory(price=Decimal("10.00"), stock=5))
+    add = api.post(reverse("api:cart-list"), {"product": product.pk, "quantity": 2})
+    assert add.status_code == 201
+    assert CartItem.objects.filter(user=user).count() == 1
+    order_resp = api.post(
+        reverse("api:order-list"),
+        {
+            "full_name": "B",
+            "email": "b@e.com",
+            "phone": "1",
+            "shipping_address": "a",
+            "method": "card",
+        },
+    )
+    assert order_resp.status_code == 201
+    order = Order.objects.get(user=user)
+    assert order.status == Order.Status.PAID
+    assert order.total_price == Decimal("20.00")
+    assert CartItem.objects.filter(user=user).count() == 0
+    product.refresh_from_db()
+    assert product.stock == 3
+
+
+@pytest.mark.django_db
+def test_orders_owner_isolation(api: APIClient) -> None:
+    owner = cast(User, UserFactory())
+    other = cast(User, UserFactory())
+    order = Order.objects.create(
+        user=owner,
+        status=Order.Status.PAID,
+        full_name="o",
+        email="o@e.com",
+        phone="1",
+        shipping_address="a",
+        total_price=Decimal("1"),
+    )
+    api.force_authenticate(user=other)
+    assert api.get(reverse("api:order-detail", args=[order.pk])).status_code == 404
+
+
+@pytest.mark.django_db
+def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
+    user = cast(User, UserFactory())
+    api.force_authenticate(user=user)
+    product = cast(Product, ProductFactory())
+    resp = api.post(
+        reverse("api:product-reviews", args=[product.pk]), {"rating": 5, "comment": "x"}
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_schema_and_docs(api: APIClient) -> None:
+    assert api.get(reverse("api:schema")).status_code == 200
+    assert api.get(reverse("api:docs")).status_code == 200

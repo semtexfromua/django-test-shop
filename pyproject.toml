@@ -10,6 +10,10 @@ dependencies = [
     "pillow>=11.0",
     "whitenoise>=6.8",
     "gunicorn>=23.0",
+    "djangorestframework>=3.17.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.29.0",
+    "django-filter>=25.2",
 ]
 
 # DRF/JWT/spectacular/graphene додамо у відповідних юнітах (API, бонуси) — не раніше.
@@ -58,6 +62,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["factory.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["rest_framework.*", "rest_framework_simplejwt.*", "drf_spectacular.*", "django_filters.*"]
 ignore_missing_imports = true
 
 [tool.django-stubs]

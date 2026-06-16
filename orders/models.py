@@ -46,3 +46,20 @@ class OrderItem(models.Model):
     @property
     def subtotal(self) -> Decimal:
         return self.price * self.quantity
+
+
+class CartItem(models.Model):
+    """БД-кошик для REST API (веб-інтерфейс використовує сесійний кошик)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cart_items"
+    )
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name="cart_items")
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "product")
+
+    def __str__(self) -> str:
+        return f"{self.quantity}× {self.product.name}"

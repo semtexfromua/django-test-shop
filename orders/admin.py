@@ -1,7 +1,12 @@
 """Адмінка замовлень."""
 from django.contrib import admin
 
-from .models import Order, OrderItem
+from .models import CartItem, Order, OrderItem
+
+
+@admin.register(CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ("user", "product", "quantity")
 
 
 class OrderItemInline(admin.TabularInline):
