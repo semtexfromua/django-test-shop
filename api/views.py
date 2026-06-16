@@ -65,7 +65,7 @@ class ProductReviewsView(generics.ListCreateAPIView):
 
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self) -> QuerySet[CartItem]:
         return CartItem.objects.filter(user=cast(User, self.request.user)).select_related("product")

@@ -132,6 +132,16 @@ def test_cart_update_product_swap_no_500(api: APIClient) -> None:
 
 
 @pytest.mark.django_db
+def test_cart_owner_isolation(api: APIClient) -> None:
+    owner = cast(User, UserFactory())
+    other = cast(User, UserFactory())
+    product = cast(Product, ProductFactory(stock=5))
+    item = CartItem.objects.create(user=owner, product=product, quantity=1)
+    api.force_authenticate(user=other)
+    assert api.get(reverse("api:cart-detail", args=[item.pk])).status_code == 404
+
+
+@pytest.mark.django_db
 def test_review_api_blocked_for_non_purchaser(api: APIClient) -> None:
     user = cast(User, UserFactory())
     api.force_authenticate(user=user)

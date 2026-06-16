@@ -24,7 +24,7 @@ def orders_by_status() -> dict[str, int]:
 
 
 def top_products(limit: int = 5) -> list[dict[str, Any]]:
-    limit = max(0, limit)
+    limit = max(0, min(limit, 100))
     return list(
         OrderItem.objects.values("product_id", "product__name")
         .annotate(sold=Sum("quantity"))
