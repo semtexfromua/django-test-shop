@@ -5,6 +5,17 @@ x-app-env: &app-env
   ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
   DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-myshop}
   CELERY_BROKER_URL: redis://redis:6379/0
+  # Email — pass through from the host env / .env so web AND worker share one config.
+  # Console by default; set EMAIL_BACKEND=...smtp... + creds to deliver real mail.
+  EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-shop@example.com}
+  ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+  EMAIL_HOST: ${EMAIL_HOST:-localhost}
+  EMAIL_PORT: ${EMAIL_PORT:-25}
+  EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+  EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+  EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+  SITE_URL: ${SITE_URL:-http://localhost:8000}
 
 services:
   db:
