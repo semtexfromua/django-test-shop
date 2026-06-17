@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-echo "→ Міграції бази даних..."
+echo "→ Database migrations..."
 python manage.py migrate --noinput
 
-echo "→ Збір статики..."
+echo "→ Collecting static files..."
 python manage.py collectstatic --noinput
 
 exec "$@"

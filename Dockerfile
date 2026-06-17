@@ -10,7 +10,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
-# Спершу лише маніфести — шар із залежностями кешується між збірками.
+# Manifests first — the dependency layer is cached across builds.
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
@@ -29,8 +29,8 @@ RUN groupadd --system app && useradd --system --gid app --home-dir /app app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --chown=app:app . .
 
-# Каталоги під named volumes створюємо в образі від імені app, щоб volume
-# успадкував правильного власника при першому монтуванні (інакше root → відмова запису).
+# Create the named-volume dirs in the image as `app` so each volume inherits the
+# right owner on first mount (otherwise root owns it → write denied).
 RUN mkdir -p /app/media /app/staticfiles \
     && chmod +x docker/entrypoint.sh \
     && chown app:app /app \
