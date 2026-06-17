@@ -5,10 +5,12 @@ payment is wired up by the checkout view. Email is sent here — order accepted.
 """
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Any
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
+from django.template.loader import render_to_string
 
 from products.models import Product
 from users.models import User
@@ -74,21 +76,24 @@ def create_order(user: User, items: list[tuple[Product, int]], contact: OrderCon
 
 
 def _send_order_emails(order: Order) -> None:
-    customer_body = f"Дякуємо! Замовлення #{order.pk} на суму ${order.total_price} прийнято."
-    send_mail(
-        f"Замовлення #{order.pk}", customer_body, settings.DEFAULT_FROM_EMAIL, [order.email],
-        fail_silently=True,
-    )
+    ctx: dict[str, Any] = {
+        "order": order,
+        "items": list(order.items.select_related("product")),
+        "site_url": settings.SITE_URL,
+    }
+    _send_email(f"Замовлення #{order.pk}", "emails/order_confirmation", ctx, [order.email])
     admin_emails = [email for _, email in settings.ADMINS]
     if admin_emails:
-        admin_body = (
-            f"Нове замовлення #{order.pk} на суму ${order.total_price} "
-            f"(покупець: {order.email})."
-        )
-        send_mail(
-            f"Нове замовлення #{order.pk}", admin_body, settings.DEFAULT_FROM_EMAIL, admin_emails,
-            fail_silently=True,
-        )
+        _send_email(f"Нове замовлення #{order.pk}", "emails/order_admin", ctx, admin_emails)
+
+
+def _send_email(subject: str, template: str, ctx: dict[str, Any], to: list[str]) -> None:
+    """Renders the .txt + .html templates and sends a multipart email (HTML with text fallback)."""
+    message = EmailMultiAlternatives(
+        subject, render_to_string(f"{template}.txt", ctx), settings.DEFAULT_FROM_EMAIL, to
+    )
+    message.attach_alternative(render_to_string(f"{template}.html", ctx), "text/html")
+    message.send(fail_silently=True)
 
 
 def cancel_order(order: Order) -> None:
