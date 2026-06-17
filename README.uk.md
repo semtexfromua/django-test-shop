@@ -71,15 +71,25 @@ Django REST Framework, моделювання реляційних даних т
 |---|---|
 | [![Каталог](docs/screenshots/catalog.jpg)](docs/screenshots/catalog.jpg) | [![Товар](docs/screenshots/product-detail.jpg)](docs/screenshots/product-detail.jpg) |
 
-| Кошик | Оформлення | Історія замовлень |
+| Кошик | Оформлення |
+|---|---|
+| [![Кошик](docs/screenshots/cart.png)](docs/screenshots/cart.png) | [![Оформлення](docs/screenshots/checkout.png)](docs/screenshots/checkout.png) |
+
+| Історія замовлень | Деталі замовлення (таймлайн статусу) | Кабінет |
 |---|---|---|
-| [![Кошик](docs/screenshots/cart.png)](docs/screenshots/cart.png) | [![Оформлення](docs/screenshots/checkout.png)](docs/screenshots/checkout.png) | [![Замовлення](docs/screenshots/order-history.png)](docs/screenshots/order-history.png) |
+| [![Замовлення](docs/screenshots/order-history.png)](docs/screenshots/order-history.png) | [![Деталі](docs/screenshots/order-detail.png)](docs/screenshots/order-detail.png) | [![Кабінет](docs/screenshots/account.png)](docs/screenshots/account.png) |
 
 ### Адмінка та API
 
 | Дашборд аналітики | Swagger / OpenAPI | GraphiQL |
 |---|---|---|
 | [![Аналітика](docs/screenshots/analytics.png)](docs/screenshots/analytics.png) | [![Swagger](docs/screenshots/api-docs.png)](docs/screenshots/api-docs.png) | [![GraphiQL](docs/screenshots/graphiql.png)](docs/screenshots/graphiql.png) |
+
+### Транзакційні листи
+
+| Підтвердження покупцю | Сповіщення адміну (зі зміною стоку) |
+|---|---|
+| [![Лист покупцю](docs/screenshots/customer-order.png)](docs/screenshots/customer-order.png) | [![Лист адміну](docs/screenshots/admin-order-info.png)](docs/screenshots/admin-order-info.png) |
 
 ## Стек
 
