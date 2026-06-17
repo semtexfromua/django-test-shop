@@ -195,18 +195,30 @@ curl -X POST localhost:8000/api/users/refresh/ \
 При оформленні (після коміту транзакції) магазин шле два **HTML-листи**
 (з плейн-текст fallback, рендеряться з `templates/emails/`): підтвердження
 замовлення покупцю та сповіщення «нове замовлення» адмінам сайту (`ADMINS`).
-Бекенд за замовчуванням — **console** (листи друкуються в лог). Щоб слати реальні
-листи, задай SMTP-бекенд і креди через env — напр. пісочниця **Mailtrap**, що
-ловить пошту у веб-інбоксі (безпечно, без ризику спаму):
+Бекенд за замовчуванням — **console** (листи друкуються в лог).
 
-```bash
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=sandbox.smtp.mailtrap.io
-EMAIL_PORT=2525
-EMAIL_HOST_USER=<твій-mailtrap-user>
-EMAIL_HOST_PASSWORD=<твій-mailtrap-password>
-EMAIL_USE_TLS=True
-```
+### Увімкнення реальної відправки (опційно)
+
+Із коробки бекенд — **console**, листи друкуються в лог, тож для локальної розробки
+налаштовувати нічого не треба. Щоб реально слати пошту, задай SMTP-бекенд і креди через
+env (`.env` локально; ці ж змінні `docker-compose.yml` прокидає у контейнери web і worker):
+
+1. **Обери провайдера.** Для тестів — пісочниця **Mailtrap** (ловить пошту у веб-інбоксі,
+   без ризику спаму). Для реальної доставки — Gmail SMTP, Brevo, SendGrid тощо.
+2. **Задай env-змінні** (приклад для Mailtrap sandbox):
+
+   ```bash
+   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+   EMAIL_HOST=sandbox.smtp.mailtrap.io
+   EMAIL_PORT=2525
+   EMAIL_HOST_USER=<твій-user>
+   EMAIL_HOST_PASSWORD=<твій-password>
+   EMAIL_USE_TLS=True
+   DEFAULT_FROM_EMAIL=shop@example.com   # адреса "From"
+   ADMIN_EMAIL=ops@example.com           # одержувач адмінського сповіщення
+   SITE_URL=http://localhost:8000        # базовий URL для посилань у листах
+   ```
+3. **Запусти Celery-воркер** — листи шле саме він, а не web-процес (див. нижче).
 
 ### Надійна доставка (Celery)
 
