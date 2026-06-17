@@ -8,6 +8,9 @@
 ![Python](https://img.shields.io/badge/python-3.13-blue)
 ![Django](https://img.shields.io/badge/Django-5.2-092E20)
 ![DRF](https://img.shields.io/badge/DRF-3.17-A30000)
+![Celery](https://img.shields.io/badge/Celery-5.6-37814A)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
 ![Ruff](https://img.shields.io/badge/lint-ruff-261230)
 ![mypy](https://img.shields.io/badge/types-mypy-2A6DB2)
@@ -37,6 +40,9 @@
 - [License](#license)
 
 ## Overview
+
+> [!NOTE]
+> **Educational project.** Built to practice and showcase production-grade Django / DRF end-to-end — not a commercial service. Payments are **mocked**, the catalog is **seeded demo data**, and the *Guides* / *Community* sections are **static demo pages**.
 
 **Hop & Barley** turns a static HTML/CSS template into a working online store for beer-brewing
 ingredients (hops, malts, yeast, kits). It is built as a learning project that demonstrates
