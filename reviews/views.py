@@ -1,4 +1,3 @@
-"""Review creation view."""
 from typing import cast
 
 from django.contrib import messages

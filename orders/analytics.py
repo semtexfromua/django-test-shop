@@ -1,4 +1,3 @@
-"""Aggregations for the admin analytics."""
 from decimal import Decimal
 from typing import Any
 

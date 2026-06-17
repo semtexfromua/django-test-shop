@@ -1,8 +1,3 @@
-"""Django base settings shared across all environments.
-
-Environment-dependent values (secrets, DB, email) are read from environment
-variables via `django-environ`. Locally they can be set in a `.env` file.
-"""
 from datetime import timedelta
 from pathlib import Path
 

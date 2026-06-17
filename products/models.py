@@ -1,4 +1,3 @@
-"""Catalog models: categories and products."""
 from typing import Any
 
 from django.core.validators import MinValueValidator
