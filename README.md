@@ -208,6 +208,20 @@ EMAIL_HOST_PASSWORD=<your-mailtrap-password>
 EMAIL_USE_TLS=True
 ```
 
+### Reliable delivery (Celery)
+
+Order emails are sent **asynchronously** through a Celery task (Redis broker), which is
+what makes a core feature reliable: checkout never blocks on SMTP, and transient failures
+(e.g. a provider rate-limit) **auto-retry** with backoff instead of being silently dropped.
+Staff can re-send an order's emails from the admin (Orders → action «Надіслати листи ще раз»).
+
+Run locally: `docker compose up -d db redis`, then `uv run celery -A config worker -l info`
+alongside `uv run python manage.py runserver` (or `docker compose up` for the full stack).
+Tests run tasks inline (`CELERY_TASK_ALWAYS_EAGER`), so no broker is needed in CI.
+
+A dedicated email-event table or a Flower dashboard would be **overkill** for this feature —
+Celery's retry plus the admin resend already cover reliable delivery.
+
 ## Testing & Code Quality
 
 ```bash
