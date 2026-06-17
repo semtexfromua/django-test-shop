@@ -1,3 +1,22 @@
+x-app-env: &app-env
+  DJANGO_SETTINGS_MODULE: config.settings.prod
+  SECRET_KEY: ${SECRET_KEY:-dev-insecure-key-change-me}
+  DEBUG: ${DEBUG:-False}
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+  DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-myshop}
+  CELERY_BROKER_URL: redis://redis:6379/0
+  # Email — pass through from the host env / .env so web AND worker share one config.
+  # Console by default; set EMAIL_BACKEND=...smtp... + creds to deliver real mail.
+  EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-shop@example.com}
+  ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+  EMAIL_HOST: ${EMAIL_HOST:-localhost}
+  EMAIL_PORT: ${EMAIL_PORT:-25}
+  EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+  EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+  EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+  SITE_URL: ${SITE_URL:-http://localhost:8000}
+
 services:
   db:
     image: postgres:16
@@ -16,15 +35,21 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   web:
     build: .
     restart: unless-stopped
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.prod
-      SECRET_KEY: ${SECRET_KEY:-dev-insecure-key-change-me}
-      DEBUG: ${DEBUG:-False}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-myshop}
+    environment: *app-env
     ports:
       - "8000:8000"
     volumes:
@@ -32,6 +57,20 @@ services:
       - staticfiles:/app/staticfiles
     depends_on:
       db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery:
+    build: .
+    restart: unless-stopped
+    # bypass the web entrypoint (migrate/collectstatic) — web handles those
+    entrypoint: ["celery", "-A", "config", "worker", "-l", "info"]
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:
