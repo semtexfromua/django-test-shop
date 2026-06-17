@@ -105,6 +105,7 @@ EMAIL_PORT = env.int("EMAIL_PORT", default=25)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+SITE_URL = env("SITE_URL", default="http://localhost:8000")  # base URL for links in emails
 
 # Auth (session-based for the web)
 LOGIN_URL = "users:login"

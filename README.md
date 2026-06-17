@@ -192,9 +192,10 @@ Single endpoint `POST /graphql/` (GraphiQL UI in dev). Analytics resolvers are *
 
 ## Email notifications
 
-On checkout (after the DB transaction commits) the shop sends two emails: an
-order confirmation to the customer and a "new order" notification to the site
-admins (`ADMINS`). The default backend is **console** (emails print to the log).
+On checkout (after the DB transaction commits) the shop sends two **HTML emails**
+(with a plain-text fallback, rendered from `templates/emails/`): an order
+confirmation to the customer and a "new order" notification to the site admins
+(`ADMINS`). The default backend is **console** (emails print to the log).
 To deliver real email, set the SMTP backend and credentials via env — e.g. the
 **Mailtrap** sandbox, which captures mail in a web inbox (safe, no real-spam risk):
 

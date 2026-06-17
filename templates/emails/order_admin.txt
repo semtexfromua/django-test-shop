@@ -1,0 +1,11 @@
+Нове замовлення #{{ order.pk }}
+
+Покупець: {{ order.full_name }} ({{ order.email }}), тел. {{ order.phone }}.
+
+Склад замовлення:
+{% for item in items %}- {{ item.product.name }} x{{ item.quantity }} — ${{ item.subtotal }}
+{% endfor %}Разом: ${{ order.total_price }}
+
+Доставка: {{ order.shipping_address }}
+
+Відкрити в адмінці: {{ site_url }}{% url 'admin:orders_order_change' order.pk %}
