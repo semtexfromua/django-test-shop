@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Гайди та рецепти | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container" style="padding-bottom:48px;">
+  <header class="page-header">
+    <div class="page-header__row">
+      <div>
+        <p class="eyebrow">База знань</p>
+        <h1>Гайди та рецепти</h1>
+        <p class="lead">Перевірені рецепти й покрокові гайди — від першої партії до власних експериментів зі стилями.</p>
+      </div>
+      <div class="orders-filter" style="margin:0;">
+        <a href="?style=" class="chip is-active">Усі</a>
+        <a href="?style=ipa" class="chip">IPA</a>
+        <a href="?style=lager" class="chip">Лагер</a>
+        <a href="?style=stout" class="chip">Стаут</a>
+        <a href="?style=wheat" class="chip">Пшеничне</a>
+      </div>
+    </div>
+  </header>
+
+  {% comment %} Рекомендований рецепт {% endcomment %}
+  <article class="featured-recipe">
+    <div class="featured-recipe__media">
+      <img src="{% static 'img/products/ipa_kit.jpg' %}" alt="West Coast IPA">
+      <span class="featured-recipe__tag">Рецепт тижня</span>
+    </div>
+    <div class="featured-recipe__body">
+      <p class="kicker">American IPA</p>
+      <h2>Класичний West Coast IPA</h2>
+      <p>Сухий, хмелевий, з вираженою гіркотою та цитрусово-сосновим ароматом. Ідеальний старт для знайомства зі світом IPA.</p>
+      <div class="recipe-meta">
+        <div class="recipe-meta__item"><span class="label">ABV</span><span class="value">6.8%</span></div>
+        <div class="recipe-meta__item"><span class="label">IBU</span><span class="value">65</span></div>
+        <div class="recipe-meta__item"><span class="label">Час</span><span class="value">4 тижні</span></div>
+        <div class="recipe-meta__item"><span class="label">Складність</span>
+          <span class="value difficulty"><span class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip"></span></span> Середня</span>
+        </div>
+      </div>
+      <a href="#" class="button button--primary" style="align-self:flex-start;">Відкрити рецепт <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </article>
+
+  {% comment %} Сітка рецептів {% endcomment %}
+  <div class="analytics-section">
+    <h2 style="font-size:18px;font-weight:700;margin:0 0 16px;">Усі рецепти</h2>
+    <div class="recipe-grid">
+      {% comment %} У реальному проєкті: {% for recipe in recipes %} ... з полями recipe.title, .image, .style, .abv, .ibu, .time, .difficulty {% endcomment %}
+      <a href="#" class="recipe-card">
+        <div class="recipe-card__media"><img src="{% static 'img/products/cascade_hops.jpg' %}" alt=""><span class="recipe-card__tag">Pale Ale</span></div>
+        <div class="recipe-card__body">
+          <h3>Cascade Pale Ale</h3>
+          <p class="desc">Збалансований пейл-ель із квітково-цитрусовим хмелем Cascade.</p>
+          <div class="recipe-card__stats"><span><i class="fa-solid fa-percent"></i> 5.2%</span><span><i class="fa-solid fa-leaf"></i> 38 IBU</span><span><i class="fa-regular fa-clock"></i> 3 тиж.</span></div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card__media"><img src="{% static 'img/products/caramel_malt.jpg' %}" alt=""><span class="recipe-card__tag">Stout</span></div>
+        <div class="recipe-card__body">
+          <h3>Вівсяний стаут</h3>
+          <p class="desc">Оксамитова текстура, ноти кави та темного шоколаду.</p>
+          <div class="recipe-card__stats"><span><i class="fa-solid fa-percent"></i> 5.8%</span><span><i class="fa-solid fa-leaf"></i> 32 IBU</span><span><i class="fa-regular fa-clock"></i> 5 тиж.</span></div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card__media"><img src="{% static 'img/products/maris_otter_malt.jpg' %}" alt=""><span class="recipe-card__tag">ESB</span></div>
+        <div class="recipe-card__body">
+          <h3>English Bitter на Maris Otter</h3>
+          <p class="desc">Класичний англійський ель із бісквітним солодовим тілом.</p>
+          <div class="recipe-card__stats"><span><i class="fa-solid fa-percent"></i> 4.6%</span><span><i class="fa-solid fa-leaf"></i> 30 IBU</span><span><i class="fa-regular fa-clock"></i> 3 тиж.</span></div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card__media"><img src="{% static 'img/products/citra_hops.jpg' %}" alt=""><span class="recipe-card__tag">NEIPA</span></div>
+        <div class="recipe-card__body">
+          <h3>Citra Hazy NEIPA</h3>
+          <p class="desc">Соковите, мутне, тропічне — повний заряд хмелю Citra.</p>
+          <div class="recipe-card__stats"><span><i class="fa-solid fa-percent"></i> 6.5%</span><span><i class="fa-solid fa-leaf"></i> 45 IBU</span><span><i class="fa-regular fa-clock"></i> 4 тиж.</span></div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card__media"><img src="{% static 'img/products/imperial_yeast.jpg' %}" alt=""><span class="recipe-card__tag">Saison</span></div>
+        <div class="recipe-card__body">
+          <h3>Фермерський сезон</h3>
+          <p class="desc">Сухий, пряний, з характерними естерами бельгійських дріжджів.</p>
+          <div class="recipe-card__stats"><span><i class="fa-solid fa-percent"></i> 6.0%</span><span><i class="fa-solid fa-leaf"></i> 28 IBU</span><span><i class="fa-regular fa-clock"></i> 4 тиж.</span></div>
+        </div>
+      </a>
+      <a href="#" class="recipe-card">
+        <div class="recipe-card__media"><img src="{% static 'img/background/hopfen-fields.jpg' %}" alt=""><span class="recipe-card__tag">Lager</span></div>
+        <div class="recipe-card__body">
+          <h3>Чеський преміум-лагер</h3>
+          <p class="desc">Чистий, хрусткий, із благородним хмелем Saaz.</p>
+          <div class="recipe-card__stats"><span><i class="fa-solid fa-percent"></i> 4.8%</span><span><i class="fa-solid fa-leaf"></i> 35 IBU</span><span><i class="fa-regular fa-clock"></i> 6 тиж.</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  {% comment %} Основи {% endcomment %}
+  <div class="analytics-section">
+    <h2 style="font-size:18px;font-weight:700;margin:0 0 16px;">Основи пивоваріння</h2>
+    <div class="basics-grid">
+      <a href="#" class="basics-item"><span class="basics-item__icon"><i class="fa-solid fa-temperature-half"></i></span><span class="basics-item__txt"><h3>Затирання солоду</h3><p>Температурні паузи й контроль цукрів</p></span><i class="fa-solid fa-chevron-right basics-item__arrow"></i></a>
+      <a href="#" class="basics-item"><span class="basics-item__icon"><i class="fa-solid fa-fire-burner"></i></span><span class="basics-item__txt"><h3>Кип'ятіння та охмелення</h3><p>Коли й скільки додавати хмелю</p></span><i class="fa-solid fa-chevron-right basics-item__arrow"></i></a>
+      <a href="#" class="basics-item"><span class="basics-item__icon"><i class="fa-solid fa-flask-vial"></i></span><span class="basics-item__txt"><h3>Бродіння</h3><p>Дріжджі, температура й терпіння</p></span><i class="fa-solid fa-chevron-right basics-item__arrow"></i></a>
+      <a href="#" class="basics-item"><span class="basics-item__icon"><i class="fa-solid fa-bottle-water"></i></span><span class="basics-item__txt"><h3>Карбонізація та розлив</h3><p>Праймінг і безпечне зберігання</p></span><i class="fa-solid fa-chevron-right basics-item__arrow"></i></a>
+    </div>
+  </div>
+</div>
+{% endblock %}

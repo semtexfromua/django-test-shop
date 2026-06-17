@@ -59,6 +59,7 @@ price into `OrderItem`, and emails the customer and admin on commit.
 - **Cart** — session-based; add / update / remove, live totals, **stock checks**.
 - **Checkout** — contact + shipping form, mock payment, atomic order creation with **price snapshots**, **no overselling**, and **email notifications** to customer + admin.
 - **Account** — registration, login/logout, **order history with status filter**, profile editing, password change. Email uniqueness enforced.
+- **Content pages (demo)** — *Guides & recipes* (`/guides/`) and *Community* (`/community/`) are fully designed storefront sections served as static `TemplateView` pages (static content, no models yet); ready to wire to real data when needed.
 - **Admin & analytics** — Django admin for all models with search, filters and custom actions (mark shipped/delivered, cancel → restock); a staff analytics dashboard (revenue, order count, status breakdown, top products) built on ORM aggregations.
 - **REST API** — products, cart, orders, reviews, registration; JWT access/refresh with **rotation + blacklist**; object-level ownership permissions; Swagger/OpenAPI docs.
 - **GraphQL analytics (bonus)** — single `/graphql/` endpoint, staff-only resolvers; introspection disabled in production.
@@ -79,6 +80,14 @@ price into `OrderItem`, and emails the customer and admin on commit.
 | Order history | Order detail (status timeline) | Account |
 |---|---|---|
 | [![Orders](docs/screenshots/order-history.png)](docs/screenshots/order-history.png) | [![Order detail](docs/screenshots/order-detail.png)](docs/screenshots/order-detail.png) | [![Account](docs/screenshots/account.png)](docs/screenshots/account.png) |
+
+### Content pages (demo)
+
+> Designed storefront sections served as static `TemplateView` pages — content is hard-coded in the templates (no models yet), ready to wire to real data.
+
+| Guides & recipes (demo) | Community (demo) |
+|---|---|
+| [![Guides — demo](docs/screenshots/guides.jpg)](docs/screenshots/guides.jpg) | [![Community — demo](docs/screenshots/community.jpg)](docs/screenshots/community.jpg) |
 
 ### Admin & API
 

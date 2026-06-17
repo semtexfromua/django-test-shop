@@ -22,9 +22,10 @@
         </a>
         <nav class="header__nav">
             <ul>
-                <li><a href="{% url 'products:list' %}">Каталог</a></li>
-                <li><a href="#">Гайди та рецепти</a></li>
-                <li><a href="#">Спільнота</a></li>
+                <li><a href="{% url 'products:list' %}" class="{% if request.resolver_match.url_name == 'list' %}is-active{% endif %}">Каталог</a></li>
+                {% if user.is_staff %}<li><a href="{% url 'orders:analytics' %}" class="{% if request.resolver_match.url_name == 'analytics' %}is-active{% endif %}">Аналітика</a></li>{% endif %}
+                <li><a href="{% url 'products:guides' %}" class="{% if request.resolver_match.url_name == 'guides' %}is-active{% endif %}">Гайди та рецепти</a></li>
+                <li><a href="{% url 'products:community' %}" class="{% if request.resolver_match.url_name == 'community' %}is-active{% endif %}">Спільнота</a></li>
             </ul>
         </nav>
         {% if user.is_authenticated %}

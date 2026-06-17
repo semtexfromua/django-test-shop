@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
@@ -36,14 +37,28 @@ def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
     product = get_object_or_404(Product.objects.active(), pk=product_id)
     cart = Cart(request)
     quantity = max(1, _quantity(request))
+    next_url = request.POST.get("next")
+    # Quick-add from the catalog redirects back to the listing; the cart badge is
+    # the feedback there, so we stay silent to avoid a flash message shifting layout.
+    safe_next = (
+        next_url
+        if next_url
+        and url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        )
+        else None
+    )
     if quantity > product.stock:
         quantity = product.stock
         messages.warning(request, f"Доступно лише {product.stock} шт.")
     if quantity > 0:
         cart.add(product, quantity)
-        messages.success(request, f"«{product.name}» додано в кошик.")
+        if not safe_next:
+            messages.success(request, f"«{product.name}» додано в кошик.")
     else:
         messages.error(request, "Товару немає в наявності.")
+    if safe_next:
+        return redirect(safe_next)
     return redirect("orders:cart_detail")
 
 

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Спільнота | Hop &amp; Barley{% endblock %}
+{% block content %}
+<div class="container" style="padding-bottom:48px;">
+  <header class="page-header">
+    <div class="page-header__row">
+      <div>
+        <p class="eyebrow">Разом варимо краще</p>
+        <h1>Спільнота пивоварів</h1>
+        <p class="lead">Діліться варіннями, ставте запитання й надихайтеся рецептами інших домашніх пивоварів.</p>
+      </div>
+      {% if user.is_authenticated %}
+      <a href="#" class="button button--primary"><i class="fa-solid fa-plus"></i> Поділитися варінням</a>
+      {% else %}
+      <a href="{% url 'users:login' %}" class="button button--primary"><i class="fa-solid fa-right-to-bracket"></i> Увійти, щоб брати участь</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="community-stats">
+    <div class="kpi kpi--accent"><div class="kpi__label"><i class="fa-solid fa-users"></i> Учасників</div><div class="kpi__value">1 248</div><div class="kpi__sub">активна спільнота</div></div>
+    <div class="kpi"><div class="kpi__label"><i class="fa-solid fa-beer-mug-empty"></i> Варінь опубліковано</div><div class="kpi__value">3 712</div><div class="kpi__sub">і щотижня більше</div></div>
+    <div class="kpi"><div class="kpi__label"><i class="fa-solid fa-comments"></i> Обговорень</div><div class="kpi__value">896</div><div class="kpi__sub">питання й поради</div></div>
+  </div>
+
+  <div class="community-grid">
+    {% comment %} Стрічка варінь: {% for post in posts %} ... post.user, .image, .beer_name, .note, .likes, .comments {% endcomment %}
+    <div class="brew-feed">
+      <article class="brew-post">
+        <div class="brew-post__head">
+          <span class="avatar">B</span>
+          <div><div class="brew-post__author">brewer_sam</div><div class="brew-post__meta">2 години тому · West Coast IPA</div></div>
+          <span class="brew-post__badge">Партія №14</span>
+        </div>
+        <div class="brew-post__media"><img src="{% static 'img/products/ipa_kit.jpg' %}" alt=""></div>
+        <div class="brew-post__body">
+          <h3>Нарешті ідеальна гіркота</h3>
+          <p>Третя спроба West Coast IPA — цього разу витримав сухе хмелення рівно 4 дні, аромат вибуховий. Cascade + Citra назавжди.</p>
+        </div>
+        <div class="brew-post__actions">
+          <button><i class="fa-regular fa-heart"></i> 48</button>
+          <button><i class="fa-regular fa-comment"></i> 12</button>
+          <button><i class="fa-regular fa-bookmark"></i> Зберегти</button>
+        </div>
+      </article>
+
+      <article class="brew-post">
+        <div class="brew-post__head">
+          <span class="avatar" style="background:#31572c;">M</span>
+          <div><div class="brew-post__author">malt_master</div><div class="brew-post__meta">учора · Вівсяний стаут</div></div>
+          <span class="brew-post__badge">Партія №7</span>
+        </div>
+        <div class="brew-post__media"><img src="{% static 'img/products/caramel_malt.jpg' %}" alt=""></div>
+        <div class="brew-post__body">
+          <h3>Оксамит у склянці</h3>
+          <p>Додав пластівці вівса до карамельного солоду — тіло стало неймовірно кремовим. Ділюся рецептом у коментарях.</p>
+        </div>
+        <div class="brew-post__actions">
+          <button><i class="fa-regular fa-heart"></i> 73</button>
+          <button><i class="fa-regular fa-comment"></i> 21</button>
+          <button><i class="fa-regular fa-bookmark"></i> Зберегти</button>
+        </div>
+      </article>
+    </div>
+
+    <aside class="community-side">
+      <div class="side-card">
+        <h3><i class="fa-solid fa-fire"></i> Активні обговорення</h3>
+        <a href="#" class="thread"><h4>Як уникнути інфекції під час бродіння?</h4><div class="meta"><span><i class="fa-regular fa-comment"></i> 34 відповіді</span><span><i class="fa-regular fa-clock"></i> 1 год</span></div></a>
+        <a href="#" class="thread"><h4>Найкращі дріжджі для NEIPA — ваш досвід</h4><div class="meta"><span><i class="fa-regular fa-comment"></i> 28 відповідей</span><span><i class="fa-regular fa-clock"></i> 3 год</span></div></a>
+        <a href="#" class="thread"><h4>Скільки реально зберігається хміль у морозилці?</h4><div class="meta"><span><i class="fa-regular fa-comment"></i> 19 відповідей</span><span><i class="fa-regular fa-clock"></i> 6 год</span></div></a>
+        <a href="#" class="thread"><h4>Перша партія вийшла надто солодкою — чому?</h4><div class="meta"><span><i class="fa-regular fa-comment"></i> 41 відповідь</span><span><i class="fa-regular fa-clock"></i> 1 день</span></div></a>
+      </div>
+
+      <div class="side-card">
+        <h3><i class="fa-regular fa-calendar"></i> Найближчі події</h3>
+        <div class="event"><div class="event__date"><div class="d">28</div><div class="m">чер</div></div><div class="event__txt"><h4>Онлайн-дегустація IPA</h4><p>19:00 · Zoom · безкоштовно</p></div></div>
+        <div class="event"><div class="event__date"><div class="d">05</div><div class="m">лип</div></div><div class="event__txt"><h4>Майстер-клас: затирання</h4><p>12:00 · Львів</p></div></div>
+        <div class="event"><div class="event__date"><div class="d">14</div><div class="m">лип</div></div><div class="event__txt"><h4>Конкурс домашніх елів</h4><p>прийом заявок відкрито</p></div></div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
