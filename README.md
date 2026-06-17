@@ -196,17 +196,29 @@ On checkout (after the DB transaction commits) the shop sends two **HTML emails*
 (with a plain-text fallback, rendered from `templates/emails/`): an order
 confirmation to the customer and a "new order" notification to the site admins
 (`ADMINS`). The default backend is **console** (emails print to the log).
-To deliver real email, set the SMTP backend and credentials via env — e.g. the
-**Mailtrap** sandbox, which captures mail in a web inbox (safe, no real-spam risk):
+### Enabling real email (optional)
 
-```bash
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=sandbox.smtp.mailtrap.io
-EMAIL_PORT=2525
-EMAIL_HOST_USER=<your-mailtrap-user>
-EMAIL_HOST_PASSWORD=<your-mailtrap-password>
-EMAIL_USE_TLS=True
-```
+Out of the box the backend is **console** — emails are printed to the log, so there's
+nothing to configure for local dev. To actually deliver mail, set the SMTP backend and
+credentials via env (`.env` locally; the same vars are forwarded to the web and worker
+containers by `docker-compose.yml`):
+
+1. **Pick a provider.** For testing, a **Mailtrap** sandbox captures mail in a web inbox
+   (safe, no real-spam risk). For real delivery use Gmail SMTP, Brevo, SendGrid, etc.
+2. **Set the env vars** (Mailtrap sandbox example):
+
+   ```bash
+   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+   EMAIL_HOST=sandbox.smtp.mailtrap.io
+   EMAIL_PORT=2525
+   EMAIL_HOST_USER=<your-user>
+   EMAIL_HOST_PASSWORD=<your-password>
+   EMAIL_USE_TLS=True
+   DEFAULT_FROM_EMAIL=shop@example.com   # the "From" address
+   ADMIN_EMAIL=ops@example.com           # recipient of the admin notification
+   SITE_URL=http://localhost:8000        # base URL for links in the emails
+   ```
+3. **Run the Celery worker** — emails are sent by it, not by the web process (see below).
 
 ### Reliable delivery (Celery)
 
