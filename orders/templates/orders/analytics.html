@@ -1,15 +1,71 @@
 {% extends "base.html" %}
 {% block title %}Аналітика | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Аналітика</h1>
-  <p>Виторг (оплачені/відправлені/доставлені): <strong>${{ revenue }}</strong></p>
-  <p>Усього замовлень: <strong>{{ order_count }}</strong></p>
+<div class="container" style="padding-bottom:48px;">
+  <div class="analytics-head">
+    <div>
+      <h1>Аналітика</h1>
+      <p class="lead">Зведення по продажах, статусах замовлень і топ-товарах.</p>
+    </div>
+    <span class="staff-badge"><i class="fa-solid fa-shield-halved"></i> Панель персоналу</span>
+  </div>
 
-  <h2>За статусами</h2>
-  <ul>{% for status, n in by_status.items %}<li>{{ status }}: {{ n }}</li>{% endfor %}</ul>
+  <!-- KPI -->
+  <div class="analytics-kpis">
+    <div class="kpi kpi--accent">
+      <div class="kpi__label"><i class="fa-solid fa-sack-dollar"></i> Виторг</div>
+      <div class="kpi__value">${{ revenue }}</div>
+      <div class="kpi__sub">оплачені · відправлені · доставлені</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__label"><i class="fa-solid fa-receipt"></i> Усього замовлень</div>
+      <div class="kpi__value">{{ order_count }}</div>
+      <div class="kpi__sub">за весь період</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__label"><i class="fa-solid fa-trophy"></i> Лідер продажів</div>
+      <div class="kpi__value" style="font-size:22px;">{{ top_products.0.product__name|default:"—" }}</div>
+      <div class="kpi__sub">{% if top_products.0.sold %}продано {{ top_products.0.sold }} од.{% else %}немає продажів{% endif %}</div>
+    </div>
+  </div>
 
-  <h2>Топ-товари (продано одиниць)</h2>
-  <ol>{% for row in top_products %}<li>{{ row.product__name }} — {{ row.sold }}</li>{% empty %}<li>Немає продажів.</li>{% endfor %}</ol>
+  <!-- By status -->
+  <div class="analytics-section">
+    <h2>Замовлення за статусами</h2>
+    <div class="status-grid">
+      {% for label, n in by_status.items %}
+      <div class="status-stat {% if label == 'Оплачено' %}is-paid{% elif label == 'Відправлено' %}is-shipped{% elif label == 'Доставлено' %}is-delivered{% elif label == 'Скасовано' %}is-cancelled{% else %}is-pending{% endif %}">
+        <div class="status-stat__top">
+          <span class="status-stat__name"><span class="dot"></span> {{ label }}</span>
+          <span class="status-stat__count">{{ n }}</span>
+        </div>
+        <div class="status-stat__bar"><div class="status-stat__fill" style="width:{% widthratio n order_count 100 %}%;"></div></div>
+      </div>
+      {% empty %}
+      <p style="color:var(--hb-grey);">Поки немає даних.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Top products -->
+  <div class="analytics-section">
+    <h2>Топ-товари за обсягом продажів</h2>
+    <div class="top-products">
+      {% for row in top_products %}
+      <div class="top-row">
+        <span class="top-row__rank">{{ forloop.counter }}</span>
+        <span class="top-row__name">{{ row.product__name }}</span>
+        <div class="top-row__bar"><div class="top-row__fill" style="width:{% widthratio row.sold top_products.0.sold 100 %}%;"></div></div>
+        <span class="top-row__sold">{{ row.sold }} <span>од.</span></span>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="padding:40px 20px;">
+        <i class="fa-solid fa-chart-simple"></i>
+        <h2>Немає продажів</h2>
+        <p>Дані з'являться після перших оплачених замовлень.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 {% endblock %}
