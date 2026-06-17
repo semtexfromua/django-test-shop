@@ -8,27 +8,35 @@
   <meta name="supported-color-schemes" content="light">
   <title>Hop &amp; Barley</title>
 </head>
-<body style="margin:0;padding:0;width:100%;background-color:#f4f4f2;font-family:Arial,Helvetica,sans-serif;color:#222222;-webkit-text-size-adjust:100%;">
-  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f4f4f2;">{% block preheader %}{% endblock %}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f2" style="background-color:#f4f4f2;">
+<body style="margin:0;padding:0;width:100%;background-color:#eef0ec;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#111d13;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#eef0ec;">{% block preheader %}{% endblock %}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef0ec" style="background-color:#eef0ec;">
     <tr>
-      <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e6e6e3;">
+      <td align="center" style="padding:32px 12px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;background-color:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e3e3e3;">
+          <!-- Header -->
           <tr>
-            <td bgcolor="#1a6b3a" style="background-color:#1a6b3a;padding:22px 32px;">
-              <span style="color:#ffffff;font-size:22px;font-weight:bold;letter-spacing:0.5px;">🍺 Hop &amp; Barley</span>
+            <td bgcolor="#02542d" style="background-color:#02542d;padding:26px 36px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:-0.3px;">Hop &amp; Barley</td>
+                  <td align="right" style="font-size:12px;color:#bfe4cb;text-transform:uppercase;letter-spacing:1px;">Домашнє пивоваріння</td>
+                </tr>
+              </table>
             </td>
           </tr>
+          <!-- Content -->
           <tr>
-            <td style="padding:32px;">
+            <td style="padding:36px;">
               {% block content %}{% endblock %}
             </td>
           </tr>
+          <!-- Footer -->
           <tr>
-            <td style="padding:20px 32px;background-color:#f0f0ee;color:#888888;font-size:12px;line-height:1.6;">
-              Hop &amp; Barley — інгредієнти для домашнього пивоваріння.<br>
-              Питання? Напишіть на <a href="mailto:support@hopbarley.example" style="color:#1a6b3a;text-decoration:none;">support@hopbarley.example</a>.<br>
-              Це автоматичний лист — відповідати на нього не потрібно.
+            <td style="padding:24px 36px;background-color:#f7f8f6;border-top:1px solid #e3e3e3;color:#7a847b;font-size:12px;line-height:1.7;">
+              <strong style="color:#4a544b;">Hop &amp; Barley</strong> — інгредієнти для домашнього пивоваріння.<br>
+              Питання? Напишіть на <a href="mailto:support@hopbarley.example" style="color:#02542d;text-decoration:none;font-weight:600;">support@hopbarley.example</a>.<br>
+              <span style="color:#9aa39b;">Це автоматичний лист — відповідати на нього не потрібно.</span>
             </td>
           </tr>
         </table>

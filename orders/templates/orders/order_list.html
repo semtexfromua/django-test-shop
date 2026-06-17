@@ -1,33 +1,46 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Мої замовлення | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Мої замовлення</h1>
-  <form method="get" class="order-filter">
-    <select name="status" onchange="this.form.submit()">
-      <option value="">Усі статуси</option>
-      {% for value, label in statuses %}
-      <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-    <noscript><button type="submit">Фільтр</button></noscript>
-  </form>
-  {% if orders %}
-  <table class="cart-table">
-    <thead><tr><th>#</th><th>Дата</th><th>Статус</th><th>Сума</th></tr></thead>
-    <tbody>
-    {% for order in orders %}
-      <tr>
-        <td><a href="{% url 'orders:order_detail' order.pk %}">#{{ order.pk }}</a></td>
-        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
-        <td>{{ order.get_status_display }}</td>
-        <td>${{ order.total_price }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>Замовлень ще немає. <a href="{% url 'products:list' %}">До каталогу</a></p>
-  {% endif %}
+<div class="container">
+  <div class="account-layout">
+    {% include "users/_account_nav.html" with active="orders" %}
+
+    <div class="account-page">
+      <h1>Мої замовлення</h1>
+      <p class="lead">Відстежуйте статус та історію ваших покупок.</p>
+
+      <form method="get" class="orders-filter">
+        <a href="{% url 'orders:list' %}" class="chip {% if not current_status %}is-active{% endif %}">Усі</a>
+        {% for value, label in statuses %}
+        <a href="?status={{ value }}" class="chip {% if current_status == value %}is-active{% endif %}">{{ label }}</a>
+        {% endfor %}
+      </form>
+
+      {% if orders %}
+      <div class="orders-list">
+        {% for order in orders %}
+        <a href="{% url 'orders:order_detail' order.pk %}" class="order-row">
+          <span class="order-row__id">#{{ order.pk }}</span>
+          <div>
+            <div class="order-row__date">{{ order.created_at|date:"d.m.Y, H:i" }}</div>
+            <div class="order-row__sub">{{ order.items.count }} товар(ів)</div>
+          </div>
+          <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
+          <span class="order-row__total">${{ order.total_price }}</span>
+          <i class="fa-solid fa-chevron-right order-row__chevron"></i>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-box-open"></i>
+        <h2>Замовлень ще немає</h2>
+        <p>Оформіть перше замовлення з нашого каталогу.</p>
+        <a href="{% url 'products:list' %}" class="button button--primary" style="display:inline-flex;">До каталогу</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

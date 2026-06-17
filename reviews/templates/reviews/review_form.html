@@ -1,19 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Відгук — {{ product.name }}{% endblock %}
+{% load static %}
+{% block title %}Відгук — {{ product.name }} | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Відгук: {{ product.name }}</h1>
-  <form class="auth-form" method="post">
-    {% csrf_token %}
-    {% for field in form %}
-    <div class="InputField">
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-      {{ field }}
-      {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+<div class="container">
+  <div class="review-form-card">
+    <div class="review-form-card__head">
+      {% if product.image %}<img src="{{ product.image.url }}" alt="">{% else %}<img src="{% static 'img/logo.svg' %}" alt="">{% endif %}
+      <div>
+        <div class="eyebrow">Відгук про товар</div>
+        <h1>{{ product.name }}</h1>
+      </div>
     </div>
-    {% endfor %}
-    <div class="ButtonGroup"><button type="submit" class="button button--primary">Надіслати відгук</button></div>
-  </form>
-  <p><a href="{{ product.get_absolute_url }}">← Назад до товару</a></p>
+    <form class="auth-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="message message--error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <div class="form-actions">
+        <button type="submit" class="button button--primary"><i class="fa-solid fa-paper-plane"></i> Надіслати відгук</button>
+        <a href="{{ product.get_absolute_url }}" class="button button--secondary">Назад до товару</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

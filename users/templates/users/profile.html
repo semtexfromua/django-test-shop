@@ -1,30 +1,33 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Кабінет | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Мій кабінет</h1>
-  <p>Привіт, {{ user.username }}!</p>
+<div class="container">
+  <div class="account-layout">
+    {% include "users/_account_nav.html" with active="profile" %}
 
-  <form class="auth-form" method="post">
-    {% csrf_token %}
-    {% for field in form %}
-    <div class="InputField">
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-      {{ field }}
-      {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+    <div class="account-page" style="max-width:640px;">
+      <h1>Мій профіль</h1>
+      <p class="lead">Керуйте особистими даними та контактами для доставки.</p>
+      <div class="section-block">
+        <form class="auth-form" method="post">
+          {% csrf_token %}
+          <div class="form-grid">
+            {% for field in form %}
+            <div class="field {% if field.name == 'phone' or field.name == 'address' %}full{% endif %}">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+            </div>
+            {% endfor %}
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button button--primary">Зберегти зміни</button>
+            <a href="{% url 'orders:list' %}" class="button button--secondary">Мої замовлення</a>
+          </div>
+        </form>
+      </div>
     </div>
-    {% endfor %}
-    <div class="ButtonGroup"><button type="submit" class="button button--primary">Зберегти профіль</button></div>
-  </form>
-
-  <p><a href="{% url 'users:password_change' %}">Змінити пароль</a></p>
-  <form method="post" action="{% url 'users:logout' %}">
-    {% csrf_token %}
-    <button type="submit" class="button button--secondary">Вийти</button>
-  </form>
-
-  <hr>
-  <h2>Історія замовлень</h2>
-  <p><a href="{% url 'orders:list' %}">Переглянути мої замовлення →</a></p>
+  </div>
 </div>
 {% endblock %}

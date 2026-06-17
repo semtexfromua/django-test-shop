@@ -1,25 +1,31 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Реєстрація | Hop &amp; Barley{% endblock %}
-{% block main_class %}auth-page-wrapper{% endblock %}
 {% block content %}
-<div class="auth-background"><img src="{% static 'img/background/pattern.jpg' %}" alt=""></div>
-<div class="auth-form-container">
-  <div class="auth-container auth-container--register">
-    <div class="Legend"><h1 class="auth-title">Реєстрація</h1></div>
-    <form class="auth-form" method="post">
-      {% csrf_token %}
-      {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
-      {% for field in form %}
-      <div class="InputField">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
-      </div>
-      {% endfor %}
-      <div class="ButtonGroup"><button type="submit" class="button button--primary">Зареєструватися</button></div>
-    </form>
-    <p class="auth-switch">Вже маєте акаунт? <a href="{% url 'users:login' %}">Увійти</a></p>
+<div class="auth-grid" style="grid-template-columns:minmax(0,440px);justify-content:center;">
+  <div class="auth-card">
+    <div class="auth-card__banner">
+      <img src="{% static 'img/products/citra_hops.jpg' %}" alt="">
+      <div class="auth-card__brand"><img src="{% static 'img/logo.svg' %}" alt=""><span>Hop &amp; Barley</span></div>
+    </div>
+    <div class="auth-card__body">
+      <h1>Створити акаунт</h1>
+      <p class="lead">Приєднуйтесь до спільноти пивоварів.</p>
+      <form class="auth-form" method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="message message--error">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small style="font-size:12px;color:var(--hb-grey);line-height:1.4;">{{ field.help_text|safe }}</small>{% endif %}
+          {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="button button--primary button--block">Зареєструватися</button>
+      </form>
+      <p class="auth-switch">Вже маєте акаунт? <a href="{% url 'users:login' %}">Увійти</a></p>
+    </div>
   </div>
 </div>
 {% endblock %}
