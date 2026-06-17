@@ -55,28 +55,31 @@
       </div>
       <div class="product-grid">
         {% for product in products %}
-        <a href="{{ product.get_absolute_url }}" class="product-card-link">
-          <div class="product-card">
-            <div class="product-card__media">
-              {% if product.image %}
-              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
-              {% else %}
-              <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-card__image">
-              {% endif %}
+        <div class="product-card">
+          <a href="{{ product.get_absolute_url }}" class="product-card__overlay" aria-label="{{ product.name }}"></a>
+          <div class="product-card__media">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
+            {% else %}
+            <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-card__image">
+            {% endif %}
+          </div>
+          <div class="product-card__info">
+            <div class="product-card__meta">
+              <span class="product-card__cat">{{ product.category.name }}</span>
+              {% if product.avg_rating %}<span class="product-card__rating"><i class="fa-solid fa-star"></i> {{ product.avg_rating|floatformat:1 }}</span>{% endif %}
             </div>
-            <div class="product-card__info">
-              <div class="product-card__meta">
-                <span class="product-card__cat">{{ product.category.name }}</span>
-                {% if product.avg_rating %}<span class="product-card__rating"><i class="fa-solid fa-star"></i> {{ product.avg_rating|floatformat:1 }}</span>{% endif %}
-              </div>
-              <h4 class="product-card__name">{{ product.name }}</h4>
-              <div class="product-card__foot">
-                <p class="product-card__price">${{ product.price }}</p>
-                <span class="product-card__add" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
-              </div>
+            <h4 class="product-card__name">{{ product.name }}</h4>
+            <div class="product-card__foot">
+              <p class="product-card__price">${{ product.price }}</p>
+              <form method="post" action="{% url 'orders:cart_add' product.id %}" class="product-card__add-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="product-card__add" aria-label="Додати «{{ product.name }}» в кошик"><i class="fa-solid fa-plus"></i></button>
+              </form>
             </div>
           </div>
-        </a>
+        </div>
         {% empty %}
         <div class="empty-state" style="grid-column:1/-1;">
           <i class="fa-solid fa-magnifying-glass"></i>
