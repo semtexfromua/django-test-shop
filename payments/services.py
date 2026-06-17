@@ -1,4 +1,3 @@
-"""Mock payment processing."""
 from orders.models import Order
 
 from .models import Payment

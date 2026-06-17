@@ -1,4 +1,3 @@
-"""Project root URL configuration."""
 from django.conf import settings
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path, re_path

@@ -1,4 +1,3 @@
-"""Admin analytics, cancellation and roles tests."""
 from decimal import Decimal
 from typing import cast
 

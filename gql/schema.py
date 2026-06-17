@@ -1,4 +1,3 @@
-"""GraphQL schema: shop analytics (staff-only access)."""
 from typing import Any
 
 import graphene

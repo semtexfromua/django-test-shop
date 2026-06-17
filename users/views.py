@@ -1,4 +1,3 @@
-"""User views."""
 from typing import Any, cast
 
 from django.contrib.auth import login

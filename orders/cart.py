@@ -1,4 +1,3 @@
-"""Session cart for the web UI."""
 from collections.abc import Iterator
 from decimal import Decimal
 from typing import Any

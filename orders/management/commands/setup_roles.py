@@ -1,4 +1,3 @@
-"""Create the Managers role group with order permissions."""
 from typing import Any
 
 from django.contrib.auth.models import Group, Permission

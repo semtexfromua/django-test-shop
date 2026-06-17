@@ -1,4 +1,3 @@
-"""Cart, checkout and order views."""
 from typing import Any, cast
 
 from django.contrib import messages

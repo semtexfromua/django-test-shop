@@ -1,4 +1,3 @@
-"""factory_boy order factories."""
 from decimal import Decimal
 
 import factory

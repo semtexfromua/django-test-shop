@@ -1,4 +1,3 @@
-"""Populate the catalog with demo data from the static Hop & Barley template."""
 from decimal import Decimal
 from typing import Any
 

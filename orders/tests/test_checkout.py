@@ -1,4 +1,3 @@
-"""Checkout and order-history tests."""
 from decimal import Decimal
 from typing import cast
 
