@@ -5,17 +5,15 @@ payment is wired up by the checkout view. Email is sent here — order accepted.
 """
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
-from django.template.loader import render_to_string
 
 from products.models import Product
 from users.models import User
 
 from .models import Order, OrderItem
+from .tasks import send_order_email
 
 
 @dataclass(frozen=True)
@@ -76,24 +74,9 @@ def create_order(user: User, items: list[tuple[Product, int]], contact: OrderCon
 
 
 def _send_order_emails(order: Order) -> None:
-    ctx: dict[str, Any] = {
-        "order": order,
-        "items": list(order.items.select_related("product")),
-        "site_url": settings.SITE_URL,
-    }
-    _send_email(f"Замовлення #{order.pk}", "emails/order_confirmation", ctx, [order.email])
-    admin_emails = [email for _, email in settings.ADMINS]
-    if admin_emails:
-        _send_email(f"Нове замовлення #{order.pk}", "emails/order_admin", ctx, admin_emails)
-
-
-def _send_email(subject: str, template: str, ctx: dict[str, Any], to: list[str]) -> None:
-    """Renders the .txt + .html templates and sends a multipart email (HTML with text fallback)."""
-    message = EmailMultiAlternatives(
-        subject, render_to_string(f"{template}.txt", ctx), settings.DEFAULT_FROM_EMAIL, to
-    )
-    message.attach_alternative(render_to_string(f"{template}.html", ctx), "text/html")
-    message.send(fail_silently=True)
+    send_order_email.delay(order.pk, "customer")
+    if any(email for _, email in settings.ADMINS):
+        send_order_email.delay(order.pk, "admin")
 
 
 def cancel_order(order: Order) -> None:

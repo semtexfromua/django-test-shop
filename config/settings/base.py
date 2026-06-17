@@ -107,6 +107,11 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
 SITE_URL = env("SITE_URL", default="http://localhost:8000")  # base URL for links in emails
 
+# Celery — async tasks (order emails) with auto-retry; tests set ALWAYS_EAGER
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 # Auth (session-based for the web)
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "users:profile"
