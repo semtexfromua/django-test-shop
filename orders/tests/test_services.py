@@ -66,10 +66,17 @@ def test_create_order_emails_customer_and_admin(django_capture_on_commit_callbac
     assert customer.to == [CONTACT.email]
     assert customer.from_email == "shop@shop.test"
     assert f"#{order.pk}" in customer.subject
-    assert f"#{order.pk}" in customer.body and "20.00" in customer.body
+    assert f"#{order.pk}" in customer.body and "20,00" in customer.body  # uk locale: comma decimal
     assert admin.to == ["admin@shop.test"]
     assert f"#{order.pk}" in admin.subject
     assert CONTACT.email in admin.body
+    # HTML alternative: items, total and an absolute link to the order / admin page
+    customer_html = cast(Any, customer).alternatives[0]
+    assert customer_html[1] == "text/html"
+    assert p.name in customer_html[0] and f"/orders/{order.pk}/" in customer_html[0]
+    admin_html = cast(Any, admin).alternatives[0]
+    assert CONTACT.email in admin_html[0]
+    assert f"/admin/orders/order/{order.pk}/change/" in admin_html[0]
 
 
 @pytest.mark.django_db
