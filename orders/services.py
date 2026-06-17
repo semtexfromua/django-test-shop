@@ -74,15 +74,19 @@ def create_order(user: User, items: list[tuple[Product, int]], contact: OrderCon
 
 
 def _send_order_emails(order: Order) -> None:
-    body = f"Дякуємо! Замовлення #{order.pk} на суму ${order.total_price} прийнято."
+    customer_body = f"Дякуємо! Замовлення #{order.pk} на суму ${order.total_price} прийнято."
     send_mail(
-        f"Замовлення #{order.pk}", body, settings.DEFAULT_FROM_EMAIL, [order.email],
+        f"Замовлення #{order.pk}", customer_body, settings.DEFAULT_FROM_EMAIL, [order.email],
         fail_silently=True,
     )
     admin_emails = [email for _, email in settings.ADMINS]
     if admin_emails:
+        admin_body = (
+            f"Нове замовлення #{order.pk} на суму ${order.total_price} "
+            f"(покупець: {order.email})."
+        )
         send_mail(
-            f"Нове замовлення #{order.pk}", body, settings.DEFAULT_FROM_EMAIL, admin_emails,
+            f"Нове замовлення #{order.pk}", admin_body, settings.DEFAULT_FROM_EMAIL, admin_emails,
             fail_silently=True,
         )
 
