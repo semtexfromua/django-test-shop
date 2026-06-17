@@ -99,6 +99,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="shop@example.com")
 ADMINS = [("Admin", env("ADMIN_EMAIL", default="admin@example.com"))]
+# SMTP — used only when EMAIL_BACKEND is the smtp backend (e.g. Mailtrap/Gmail/Brevo via env)
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=25)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
 
 # Auth (session-based for the web)
 LOGIN_URL = "users:login"

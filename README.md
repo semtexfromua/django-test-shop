@@ -30,6 +30,7 @@
 - [Local Development](#local-development)
 - [REST API & JWT](#rest-api--jwt)
 - [GraphQL (bonus)](#graphql-bonus)
+- [Email notifications](#email-notifications)
 - [Testing & Code Quality](#testing--code-quality)
 - [Project Structure](#project-structure)
 - [Implementation Checklist](#implementation-checklist)
@@ -187,6 +188,23 @@ Single endpoint `POST /graphql/` (GraphiQL UI in dev). Analytics resolvers are *
   orderCount
   topProducts(limit: 5) { name sold }
 }
+```
+
+## Email notifications
+
+On checkout (after the DB transaction commits) the shop sends two emails: an
+order confirmation to the customer and a "new order" notification to the site
+admins (`ADMINS`). The default backend is **console** (emails print to the log).
+To deliver real email, set the SMTP backend and credentials via env — e.g. the
+**Mailtrap** sandbox, which captures mail in a web inbox (safe, no real-spam risk):
+
+```bash
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=sandbox.smtp.mailtrap.io
+EMAIL_PORT=2525
+EMAIL_HOST_USER=<your-mailtrap-user>
+EMAIL_HOST_PASSWORD=<your-mailtrap-password>
+EMAIL_USE_TLS=True
 ```
 
 ## Testing & Code Quality
