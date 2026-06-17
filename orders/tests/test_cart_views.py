@@ -1,4 +1,3 @@
-"""Cart view tests."""
 from typing import cast
 
 import pytest

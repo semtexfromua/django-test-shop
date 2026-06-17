@@ -1,4 +1,3 @@
-"""Catalog admin."""
 from django.contrib import admin
 from django.db.models import QuerySet, Sum
 from django.http import HttpRequest

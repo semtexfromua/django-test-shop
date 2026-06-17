@@ -1,4 +1,3 @@
-"""Review permission logic."""
 from orders.models import Order, OrderItem
 from products.models import Product
 from users.models import User

@@ -1,4 +1,3 @@
-"""factory_boy factories for catalog tests."""
 from decimal import Decimal
 
 import factory

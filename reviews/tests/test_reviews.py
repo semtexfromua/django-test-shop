@@ -1,4 +1,3 @@
-"""Review tests (the "only after purchase" rule)."""
 from decimal import Decimal
 from typing import cast
 

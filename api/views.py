@@ -1,4 +1,3 @@
-"""DRF viewsets and APIViews."""
 from typing import Any, cast
 
 from django.db import transaction

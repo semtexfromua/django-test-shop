@@ -1,4 +1,3 @@
-"""User URLs (prefix /account/)."""
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.urls import path, reverse_lazy
 

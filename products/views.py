@@ -1,4 +1,3 @@
-"""Catalog views."""
 from decimal import Decimal, InvalidOperation
 from typing import Any, cast
 

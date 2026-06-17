@@ -1,4 +1,3 @@
-"""GraphQL analytics tests."""
 import json
 from decimal import Decimal
 from typing import Any, cast
