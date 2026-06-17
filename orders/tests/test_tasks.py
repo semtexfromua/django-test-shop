@@ -1,9 +1,12 @@
 """Order email Celery task tests (run eagerly)."""
+import smtplib
 from decimal import Decimal
 from typing import cast
+from unittest import mock
 
 import pytest
 from django.core import mail
+from django.core.mail import EmailMultiAlternatives
 from django.test import override_settings
 
 from orders.models import Order, OrderItem
@@ -41,3 +44,26 @@ def test_send_order_email_admin() -> None:
     send_order_email(order.pk, "admin")
     assert len(mail.outbox) == 1
     assert mail.outbox[0].to == ["admin@shop.test"]
+
+
+def test_send_order_email_configured_to_retry_on_transient_errors() -> None:
+    # transient SMTP/connection errors auto-retry with backoff (a real worker re-runs the task)
+    assert send_order_email.max_retries == 5
+    assert smtplib.SMTPException in send_order_email.autoretry_for
+    assert OSError in send_order_email.autoretry_for
+    assert send_order_email.retry_backoff
+
+
+@pytest.mark.django_db
+@override_settings(DEFAULT_FROM_EMAIL="shop@shop.test")
+def test_send_order_email_failure_is_not_swallowed() -> None:
+    # no fail_silently: a send failure propagates so Celery's autoretry catches it
+    order = _order(cast(User, UserFactory()))
+    with (
+        mock.patch.object(
+            EmailMultiAlternatives, "send", side_effect=smtplib.SMTPException("boom")
+        ),
+        pytest.raises(smtplib.SMTPException),
+    ):
+        send_order_email(order.pk, "customer")
+    assert mail.outbox == []
