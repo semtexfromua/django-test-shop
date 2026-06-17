@@ -72,15 +72,25 @@ price into `OrderItem`, and emails the customer and admin on commit.
 |---|---|
 | [![Catalog](docs/screenshots/catalog.jpg)](docs/screenshots/catalog.jpg) | [![Product](docs/screenshots/product-detail.jpg)](docs/screenshots/product-detail.jpg) |
 
-| Cart | Checkout | Order history |
+| Cart | Checkout |
+|---|---|
+| [![Cart](docs/screenshots/cart.png)](docs/screenshots/cart.png) | [![Checkout](docs/screenshots/checkout.png)](docs/screenshots/checkout.png) |
+
+| Order history | Order detail (status timeline) | Account |
 |---|---|---|
-| [![Cart](docs/screenshots/cart.png)](docs/screenshots/cart.png) | [![Checkout](docs/screenshots/checkout.png)](docs/screenshots/checkout.png) | [![Orders](docs/screenshots/order-history.png)](docs/screenshots/order-history.png) |
+| [![Orders](docs/screenshots/order-history.png)](docs/screenshots/order-history.png) | [![Order detail](docs/screenshots/order-detail.png)](docs/screenshots/order-detail.png) | [![Account](docs/screenshots/account.png)](docs/screenshots/account.png) |
 
 ### Admin & API
 
 | Analytics dashboard | Swagger / OpenAPI | GraphiQL |
 |---|---|---|
 | [![Analytics](docs/screenshots/analytics.png)](docs/screenshots/analytics.png) | [![Swagger](docs/screenshots/api-docs.png)](docs/screenshots/api-docs.png) | [![GraphiQL](docs/screenshots/graphiql.png)](docs/screenshots/graphiql.png) |
+
+### Transactional emails
+
+| Customer confirmation | Admin notification (with stock change) |
+|---|---|
+| [![Customer email](docs/screenshots/customer-order.png)](docs/screenshots/customer-order.png) | [![Admin email](docs/screenshots/admin-order-info.png)](docs/screenshots/admin-order-info.png) |
 
 ## Tech Stack
 
