@@ -1,7 +1,7 @@
 from decimal import Decimal, InvalidOperation
 from typing import Any, cast
 
-from django.db.models import Avg, Q, QuerySet, Sum
+from django.db.models import Avg, IntegerField, OuterRef, Q, QuerySet, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.views.generic import DetailView, ListView
 
@@ -30,7 +30,13 @@ class ProductListView(ListView):
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[Product]:
-        qs = Product.objects.active().select_related("category")
+        # avg_rating for the card rating block; Avg over the reviews join is invariant to
+        # row duplication, so it stays correct even alongside other annotations.
+        qs = (
+            Product.objects.active()
+            .select_related("category")
+            .annotate(avg_rating=Avg("reviews__rating"))
+        )
         params = self.request.GET
         if category := params.get("category"):
             qs = qs.filter(category__slug=category)
@@ -42,9 +48,22 @@ class ProductListView(ListView):
             qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
         sort = params.get("sort")
         if sort == "popularity":
-            qs = qs.annotate(_sold=Coalesce(Sum("order_items__quantity"), 0)).order_by("-_sold")
+            # sold via Subquery so the reviews join above can't inflate the sum (JOIN inflation).
+            # local import keeps products from importing orders at module level (cycle).
+            from orders.models import OrderItem
+
+            sold = Subquery(
+                OrderItem.objects.filter(product=OuterRef("pk"))
+                .values("product")
+                .annotate(total=Sum("quantity"))
+                .values("total"),
+                output_field=IntegerField(),
+            )
+            qs = qs.annotate(_sold=Coalesce(sold, 0)).order_by("-_sold")
         elif sort in SORT_OPTIONS:
             qs = qs.order_by(sort)
+        else:
+            qs = qs.order_by("-created_at")  # explicit: the Avg annotate drops implicit Meta order
         return qs
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

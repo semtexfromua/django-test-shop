@@ -8,34 +8,37 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/shop.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
 <header>
     <div class="header-container">
         <a href="{% url 'products:list' %}" class="header__logo">
-            <img src="{% static 'img/logo.svg' %}" alt="Hop & Barley Logo">
+            <img src="{% static 'img/logo.svg' %}" alt="Hop &amp; Barley">
             <p class="logo-text">Hop &amp; Barley</p>
         </a>
         <nav class="header__nav">
             <ul>
-                <li><a href="{% url 'products:list' %}">Products</a></li>
-                <li><a href="#">Guides &amp; Recipes</a></li>
-                <li><a href="#">Community</a></li>
+                <li><a href="{% url 'products:list' %}">Каталог</a></li>
+                <li><a href="#">Гайди та рецепти</a></li>
+                <li><a href="#">Спільнота</a></li>
             </ul>
         </nav>
         {% if user.is_authenticated %}
         <div class="header__user-actions">
-            <a href="{% url 'users:profile' %}" class="user-icon" aria-label="My Account"><img src="{% static 'img/icons/User_alt.svg' %}" alt="Account"></a>
-            <a href="{% url 'orders:cart_detail' %}" class="cart-icon" aria-label="Shopping Cart"><img src="{% static 'img/icons/Shopping_bag.svg' %}" alt="Cart"></a>
+            <a href="{% url 'users:profile' %}" class="icon-button" aria-label="Мій кабінет"><i class="fa-regular fa-user"></i></a>
+            <a href="{% url 'orders:cart_detail' %}" class="icon-button" aria-label="Кошик">
+                <i class="fa-solid fa-bag-shopping"></i>
+                {% if cart_count %}<span class="icon-button__badge">{{ cart_count }}</span>{% endif %}
+            </a>
         </div>
         {% else %}
         <div class="header__auth-buttons">
-            <a href="{% url 'users:login' %}" class="button button--secondary">Sign in</a>
-            <a href="{% url 'users:register' %}" class="button button--primary">Register</a>
+            <a href="{% url 'users:login' %}" class="button button--secondary">Увійти</a>
+            <a href="{% url 'users:register' %}" class="button button--primary">Реєстрація</a>
         </div>
         {% endif %}
     </div>
@@ -44,23 +47,25 @@
 <main class="{% block main_class %}{% endblock %}">
     {% if messages %}
     <div class="container messages">
-        {% for m in messages %}<p class="message message--{{ m.tags }}">{{ m }}</p>{% endfor %}
+        {% for m in messages %}
+        <p class="message message--{{ m.tags }}"><i class="fa-solid fa-circle-info"></i>{{ m }}</p>
+        {% endfor %}
     </div>
     {% endif %}
     {% block content %}{% endblock %}
 </main>
 
 <footer>
-    <img src="{% static 'img/background/image-footer.svg' %}" alt="Hop & Barley" class="footer__hops-logo">
+    <img src="{% static 'img/background/image-footer.svg' %}" alt="Hop &amp; Barley" class="footer__hops-logo">
     <nav class="footer__nav">
         <ul>
-            <li><a href="#">Contact</a></li>
+            <li><a href="#">Контакти</a></li>
             <li><a href="#">FAQ</a></li>
-            <li><a href="#">Community</a></li>
-            <li><a href="#">Resources</a></li>
+            <li><a href="#">Спільнота</a></li>
+            <li><a href="#">Ресурси</a></li>
         </ul>
     </nav>
-    <p class="footer__copyright">© Hop &amp; Barley 2025. All rights reserved</p>
+    <p class="footer__copyright">© Hop &amp; Barley 2025. Всі права захищені</p>
 </footer>
 </body>
 </html>

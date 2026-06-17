@@ -1,53 +1,94 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{{ product.name }} | Hop &amp; Barley{% endblock %}
-{% block main_class %}page-product{% endblock %}
 {% block content %}
 <div class="container">
-    <section class="product-details-section">
-        <div class="product-image-container">
-            {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
-            {% else %}
-            <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-image">
-            {% endif %}
-        </div>
-        <div class="product-info-column">
-            <div class="product-title-price">
-                <h1 class="product-name">{{ product.name }}</h1>
-                <div class="price-section">
-                    <span class="price-tag">{{ product.category.name }}</span>
-                    <p class="product-price">${{ product.price }}</p>
-                </div>
-            </div>
-            <div class="product-description">{{ product.description|linebreaks }}</div>
-            <form class="cart-controls" method="post" action="{% url 'orders:cart_add' product.id %}">
-                {% csrf_token %}
-                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="Input">
-                <button type="submit" class="button button--primary add-to-cart-button">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span>Додати в кошик</span>
-                </button>
-            </form>
-        </div>
-    </section>
+  <nav class="breadcrumb">
+    <a href="{% url 'products:list' %}">Каталог</a>
+    <i class="fa-solid fa-chevron-right"></i>
+    <a href="?category={{ product.category.slug }}">{{ product.category.name }}</a>
+    <i class="fa-solid fa-chevron-right"></i>
+    <span class="current">{{ product.name }}</span>
+  </nav>
 
-    <section class="reviews-section">
-        <h2 class="reviews-title">Відгуки{% if avg_rating %} — {{ avg_rating|floatformat:1 }}★{% endif %}</h2>
-        {% if user.is_authenticated %}
-        <p><a href="{% url 'reviews:create' product.slug %}" class="button button--secondary">Залишити відгук</a></p>
+  <section class="product-details-section">
+    <div class="product-gallery">
+      <div class="product-gallery__main">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+        <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}">
         {% endif %}
-        <div class="reviews-grid">
-        {% for review in reviews %}
-            <div class="review-card">
-                <div class="review-rating">{% for _ in ""|center:review.rating %}★{% endfor %}</div>
-                <div class="review-body"><p class="review-text">{{ review.comment }}</p></div>
-                <div class="review-author"><span class="author-name">{{ review.user.username }}</span></div>
-            </div>
-        {% empty %}
-            <p>Відгуків поки немає.</p>
-        {% endfor %}
+      </div>
+    </div>
+
+    <div class="product-info-column">
+      <span class="price-tag">{{ product.category.name }}</span>
+      <h1 class="product-name">{{ product.name }}</h1>
+      <div class="product-rating-row">
+        {% if avg_rating %}
+        <span class="stars">
+          {% for i in "12345" %}{% if forloop.counter <= avg_rating %}<i class="fa-solid fa-star"></i>{% else %}<i class="fa-regular fa-star" style="color:#d0d4cf;"></i>{% endif %}{% endfor %}
+        </span>
+        <span style="font-size:14px;color:var(--hb-grey);">{{ avg_rating|floatformat:1 }} · {{ reviews|length }} відгук(ів)</span>
+        {% endif %}
+        {% if product.stock > 0 %}
+        <span class="in-stock"><i class="fa-solid fa-circle-check"></i> В наявності</span>
+        {% else %}
+        <span class="in-stock" style="color:#c0392b;"><i class="fa-solid fa-circle-xmark"></i> Немає в наявності</span>
+        {% endif %}
+      </div>
+      <p class="product-price">${{ product.price }}</p>
+      <div class="product-description">{{ product.description|linebreaks }}</div>
+
+      <form class="cart-controls" method="post" action="{% url 'orders:cart_add' product.id %}">
+        {% csrf_token %}
+        <div class="qty-stepper">
+          <button type="button" onclick="var i=this.nextElementSibling;i.value=Math.max(1,(+i.value||1)-1);">−</button>
+          <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}">
+          <button type="button" onclick="var i=this.previousElementSibling;i.value=Math.min({{ product.stock }},(+i.value||1)+1);">+</button>
         </div>
-    </section>
+        <button type="submit" class="button button--primary add-to-cart-button"><i class="fa-solid fa-bag-shopping"></i> Додати в кошик</button>
+      </form>
+
+      <div class="product-perks">
+        <span><i class="fa-solid fa-truck-fast"></i> Доставка 1–3 дні</span>
+        <span><i class="fa-solid fa-leaf"></i> Свіжий урожай</span>
+        <span><i class="fa-solid fa-rotate-left"></i> Повернення 14 днів</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="reviews-section">
+    <div class="reviews-head">
+      <h2>Відгуки {% if avg_rating %}<span style="font-size:15px;color:var(--hb-grey);font-weight:500;">— <strong style="color:var(--hb-gold);">{{ avg_rating|floatformat:1 }}</strong> ★</span>{% endif %}</h2>
+      {% if user.is_authenticated %}
+      <a href="{% url 'reviews:create' product.slug %}" class="button button--ghost"><i class="fa-solid fa-pen"></i> Залишити відгук</a>
+      {% endif %}
+    </div>
+    <div class="reviews-grid">
+      {% for review in reviews %}
+      <div class="review-card">
+        <div class="review-card__head">
+          <div class="review-card__author">
+            <span class="avatar">{{ review.user.username|slice:":1"|upper }}</span>
+            <div>
+              <div class="review-card__name">{{ review.user.username }}</div>
+              <div class="review-card__date">{{ review.created_at|date:"d F Y" }}</div>
+            </div>
+          </div>
+          <span class="stars" style="font-size:13px;">{% for _ in ""|center:review.rating %}<i class="fa-solid fa-star"></i>{% endfor %}</span>
+        </div>
+        <p class="review-text">{{ review.comment }}</p>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="grid-column:1/-1;">
+        <i class="fa-regular fa-comment-dots"></i>
+        <h2>Відгуків поки немає</h2>
+        <p>Станьте першим, хто поділиться враженням про цей товар.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
 </div>
 {% endblock %}

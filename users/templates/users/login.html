@@ -1,25 +1,30 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Вхід | Hop &amp; Barley{% endblock %}
-{% block main_class %}auth-page-wrapper{% endblock %}
 {% block content %}
-<div class="auth-background"><img src="{% static 'img/background/pattern.jpg' %}" alt=""></div>
-<div class="auth-form-container">
-  <div class="auth-container auth-container--login">
-    <div class="Legend"><h1 class="auth-title">Вхід</h1></div>
-    <form class="auth-form" method="post">
-      {% csrf_token %}
-      {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
-      {% for field in form %}
-      <div class="InputField">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
-      </div>
-      {% endfor %}
-      <div class="ButtonGroup"><button type="submit" class="button button--primary">Увійти</button></div>
-    </form>
-    <p class="auth-switch">Немає акаунту? <a href="{% url 'users:register' %}">Зареєструватися</a></p>
+<div class="auth-grid" style="grid-template-columns:minmax(0,440px);justify-content:center;">
+  <div class="auth-card">
+    <div class="auth-card__banner">
+      <img src="{% static 'img/background/hopfen-fields.jpg' %}" alt="">
+      <div class="auth-card__brand"><img src="{% static 'img/logo.svg' %}" alt=""><span>Hop &amp; Barley</span></div>
+    </div>
+    <div class="auth-card__body">
+      <h1>З поверненням!</h1>
+      <p class="lead">Увійдіть, щоб продовжити покупки.</p>
+      <form class="auth-form" method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="message message--error">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="button button--primary button--block">Увійти</button>
+      </form>
+      <p class="auth-switch">Немає акаунту? <a href="{% url 'users:register' %}">Зареєструватися</a></p>
+    </div>
   </div>
 </div>
 {% endblock %}

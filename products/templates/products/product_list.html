@@ -2,84 +2,104 @@
 {% load static %}
 {% block title %}Каталог | Hop &amp; Barley{% endblock %}
 {% block content %}
-<section class="hero-banner">
-    <img src="{% static 'img/background/hopfen-fields.jpg' %}" alt="Hops" class="hero-banner__image">
-    <div class="hero-banner__overlay"></div>
-</section>
+<div class="container">
+  <section class="hero-banner">
+    <img src="{% static 'img/background/hopfen-fields.jpg' %}" alt="Хміль" class="hero-banner__image">
+    <div class="hero-banner__overlay">
+      <h3>Все для домашнього пивоваріння</h3>
+      <p>Хміль, солод, дріжджі та набори — свіжі інгредієнти з перевіреним походженням.</p>
+    </div>
+  </section>
 
-<div class="container main-content-grid">
-    <form method="get" class="sidebar filter-menu">
-        <div class="sidebar__section">
-            <h3 class="section-title">Search</h3>
-            <div class="search-input-wrapper">
-                <input type="text" name="q" value="{{ current.q }}" placeholder="Search" class="search-input">
-            </div>
+  <div class="main-content-grid">
+    <form method="get" class="sidebar">
+      <div class="sidebar__section">
+        <label class="section-title">Пошук</label>
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="search" name="q" value="{{ current.q }}" placeholder="Назва товару…">
         </div>
-        <div class="sidebar__section">
-            <h3 class="section-title">Category</h3>
-            <select name="category" class="search-input">
-                <option value="">All</option>
-                {% for c in categories %}
-                <option value="{{ c.slug }}" {% if current.category == c.slug %}selected{% endif %}>{{ c.name }}</option>
-                {% endfor %}
-            </select>
+      </div>
+      <div class="sidebar__section">
+        <label class="section-title">Категорія</label>
+        <div class="filter-cats">
+          <a href="?{% if current.q %}q={{ current.q }}{% endif %}" class="{% if not current.category %}is-active{% endif %}"><i class="fa-solid fa-circle" style="font-size:7px;"></i> Усі товари</a>
+          {% for c in categories %}
+          <a href="?category={{ c.slug }}" class="{% if current.category == c.slug %}is-active{% endif %}">{{ c.name }}</a>
+          {% endfor %}
         </div>
-        <div class="sidebar__section">
-            <h3 class="section-title">Price</h3>
-            <input type="number" step="0.01" name="min_price" value="{{ current.min_price }}" placeholder="from" class="search-input">
-            <input type="number" step="0.01" name="max_price" value="{{ current.max_price }}" placeholder="to" class="search-input">
+      </div>
+      <div class="sidebar__section">
+        <label class="section-title">Ціна, $</label>
+        <div class="price-row">
+          <input type="number" step="0.01" name="min_price" value="{{ current.min_price }}" placeholder="від">
+          <input type="number" step="0.01" name="max_price" value="{{ current.max_price }}" placeholder="до">
         </div>
-        <div class="sidebar__section">
-            <h3 class="section-title">Sort</h3>
-            <select name="sort" class="search-input">
-                <option value="">New</option>
-                <option value="price" {% if current.sort == 'price' %}selected{% endif %}>Price ascending</option>
-                <option value="-price" {% if current.sort == '-price' %}selected{% endif %}>Price descending</option>
-                <option value="popularity" {% if current.sort == 'popularity' %}selected{% endif %}>Популярні</option>
-            </select>
-        </div>
-        <button type="submit" class="button button--primary">Apply</button>
+      </div>
+      <div class="sidebar__section">
+        <label class="section-title">Сортування</label>
+        <select name="sort">
+          <option value="" {% if not current.sort %}selected{% endif %}>Спочатку нові</option>
+          <option value="price" {% if current.sort == 'price' %}selected{% endif %}>Ціна: за зростанням</option>
+          <option value="-price" {% if current.sort == '-price' %}selected{% endif %}>Ціна: за спаданням</option>
+          <option value="popularity" {% if current.sort == 'popularity' %}selected{% endif %}>Популярні</option>
+        </select>
+      </div>
+      <button type="submit" class="button button--primary button--block">Застосувати</button>
+      <a href="{% url 'products:list' %}" class="button button--secondary button--block">Скинути фільтри</a>
     </form>
 
-    <section class="products-area product-grid-section">
-        <div class="product-grid">
-            {% for product in products %}
-            <a href="{{ product.get_absolute_url }}" class="product-card-link">
-                <div class="product-card">
-                    {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
-                    {% else %}
-                    <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-card__image">
-                    {% endif %}
-                    <div class="product-card__info">
-                        <h4 class="product-card__name">{{ product.name }}</h4>
-                        <p class="product-card__price">${{ product.price }}</p>
-                        <p class="product-card__description">{{ product.category.name }}</p>
-                    </div>
-                </div>
-            </a>
-            {% empty %}
-            <p>Нічого не знайдено.</p>
-            {% endfor %}
-        </div>
-
-        {% if is_paginated %}
-        <div class="pagination">
-            {% if page_obj.has_previous %}
-            <a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}" class="pagination__link pagination__link--prev">
-                <i class="fa-solid fa-arrow-left"></i><span>Previous</span>
-            </a>
-            {% endif %}
-            <div class="pagination-list">
-                <span class="pagination__link active">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    <section class="products-area">
+      <div class="results-bar">
+        <p><strong style="color:var(--hb-ink);">{{ paginator.count|default:products|length }}</strong> товарів у каталозі</p>
+      </div>
+      <div class="product-grid">
+        {% for product in products %}
+        <a href="{{ product.get_absolute_url }}" class="product-card-link">
+          <div class="product-card">
+            <div class="product-card__media">
+              {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
+              {% else %}
+              <img src="{% static 'img/logo.svg' %}" alt="{{ product.name }}" class="product-card__image">
+              {% endif %}
             </div>
-            {% if page_obj.has_next %}
-            <a href="?{{ querystring }}&page={{ page_obj.next_page_number }}" class="pagination__link pagination__link--next">
-                <span>Next</span><i class="fa-solid fa-arrow-right"></i>
-            </a>
-            {% endif %}
+            <div class="product-card__info">
+              <div class="product-card__meta">
+                <span class="product-card__cat">{{ product.category.name }}</span>
+                {% if product.avg_rating %}<span class="product-card__rating"><i class="fa-solid fa-star"></i> {{ product.avg_rating|floatformat:1 }}</span>{% endif %}
+              </div>
+              <h4 class="product-card__name">{{ product.name }}</h4>
+              <div class="product-card__foot">
+                <p class="product-card__price">${{ product.price }}</p>
+                <span class="product-card__add" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% empty %}
+        <div class="empty-state" style="grid-column:1/-1;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <h2>Нічого не знайдено</h2>
+          <p>Спробуйте змінити фільтри або пошуковий запит.</p>
         </div>
+        {% endfor %}
+      </div>
+
+      {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}" class="pagination__link"><i class="fa-solid fa-arrow-left"></i> Назад</a>
         {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <a href="?{{ querystring }}&page={{ num }}" class="pagination__link {% if num == page_obj.number %}active{% endif %}">{{ num }}</a>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?{{ querystring }}&page={{ page_obj.next_page_number }}" class="pagination__link">Далі <i class="fa-solid fa-arrow-right"></i></a>
+        {% endif %}
+      </div>
+      {% endif %}
     </section>
+  </div>
 </div>
 {% endblock %}

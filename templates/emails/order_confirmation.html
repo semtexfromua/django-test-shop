@@ -1,39 +1,51 @@
 {% extends "emails/base_email.html" %}
 {% block preheader %}Замовлення #{{ order.pk }} прийнято — дякуємо за покупку!{% endblock %}
 {% block content %}
-<h1 style="margin:0 0 8px;font-size:22px;color:#1a6b3a;">Дякуємо за замовлення!</h1>
-<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#444444;">
-  Вітаємо, {{ order.full_name }}! Замовлення <strong>#{{ order.pk }}</strong>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td align="center" style="padding:0 0 20px;">
+    <span style="display:inline-block;width:56px;height:56px;background-color:#eaf7ec;border-radius:50%;text-align:center;line-height:56px;font-size:26px;color:#02542d;">&#10003;</span>
+  </td></tr>
+</table>
+<h1 style="margin:0 0 10px;font-size:24px;font-weight:bold;color:#111d13;text-align:center;letter-spacing:-0.4px;">Дякуємо за замовлення!</h1>
+<p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#4a544b;text-align:center;">
+  Вітаємо, {{ order.full_name }}! Замовлення <strong style="color:#111d13;">#{{ order.pk }}</strong>
   від {{ order.created_at|date:"d.m.Y H:i" }} прийнято — ми вже його обробляємо.
 </p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 24px;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;margin:0 0 24px;border:1px solid #e3e3e3;border-radius:12px;overflow:hidden;">
   <tr>
-    <th align="left" style="padding:8px 0;border-bottom:2px solid #1a6b3a;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#888888;">Товар</th>
-    <th align="center" style="padding:8px 0;border-bottom:2px solid #1a6b3a;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#888888;">К-сть</th>
-    <th align="right" style="padding:8px 0;border-bottom:2px solid #1a6b3a;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#888888;">Сума</th>
+    <th align="left" style="padding:13px 18px;background-color:#f7f8f6;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:#7a847b;">Товар</th>
+    <th align="center" style="padding:13px 8px;background-color:#f7f8f6;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:#7a847b;">К-сть</th>
+    <th align="right" style="padding:13px 18px;background-color:#f7f8f6;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:#7a847b;">Сума</th>
   </tr>
   {% for item in items %}
   <tr>
-    <td style="padding:12px 0;border-bottom:1px solid #eeeeee;font-size:14px;">{{ item.product.name }}</td>
-    <td align="center" style="padding:12px 0;border-bottom:1px solid #eeeeee;font-size:14px;">{{ item.quantity }}</td>
-    <td align="right" style="padding:12px 0;border-bottom:1px solid #eeeeee;font-size:14px;">${{ item.subtotal }}</td>
+    <td style="padding:14px 18px;border-top:1px solid #eef0ed;font-size:14px;color:#111d13;font-weight:600;">{{ item.product.name }}</td>
+    <td align="center" style="padding:14px 8px;border-top:1px solid #eef0ed;font-size:14px;color:#4a544b;">{{ item.quantity }}</td>
+    <td align="right" style="padding:14px 18px;border-top:1px solid #eef0ed;font-size:14px;color:#111d13;font-weight:600;">${{ item.subtotal }}</td>
   </tr>
   {% endfor %}
   <tr>
-    <td colspan="2" align="right" style="padding:16px 0 0;font-size:16px;font-weight:bold;">Разом:</td>
-    <td align="right" style="padding:16px 0 0;font-size:16px;font-weight:bold;color:#1a6b3a;">${{ order.total_price }}</td>
+    <td colspan="2" align="right" style="padding:16px 18px;border-top:2px solid #02542d;font-size:15px;font-weight:bold;color:#111d13;">Разом:</td>
+    <td align="right" style="padding:16px 18px;border-top:2px solid #02542d;font-size:18px;font-weight:bold;color:#02542d;">${{ order.total_price }}</td>
   </tr>
 </table>
-<p style="margin:0 0 28px;font-size:14px;line-height:1.6;color:#444444;"><strong>Адреса доставки</strong><br>{{ order.shipping_address }}</p>
-<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
+  <tr><td style="padding:16px 18px;background-color:#f7f8f6;border-radius:12px;font-size:14px;line-height:1.6;color:#4a544b;">
+    <strong style="color:#111d13;display:block;margin-bottom:4px;">Адреса доставки</strong>{{ order.shipping_address }}
+  </td></tr>
+</table>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center">
   <!--[if mso]>
-  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ site_url }}{% url 'orders:order_detail' order.pk %}" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="13%" strokecolor="#1a6b3a" fillcolor="#1a6b3a">
+  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ site_url }}{% url 'orders:order_detail' order.pk %}" style="height:48px;v-text-anchor:middle;width:260px;" arcsize="25%" strokecolor="#02542d" fillcolor="#02542d">
   <w:anchorlock/>
   <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Переглянути замовлення</center>
   </v:roundrect>
   <![endif]-->
   <!--[if !mso]><!-- -->
-  <a href="{{ site_url }}{% url 'orders:order_detail' order.pk %}" style="background-color:#1a6b3a;border-radius:6px;color:#ffffff;display:inline-block;font-size:15px;font-weight:bold;line-height:46px;text-align:center;text-decoration:none;width:240px;-webkit-text-size-adjust:none;">Переглянути замовлення</a>
+  <a href="{{ site_url }}{% url 'orders:order_detail' order.pk %}" style="background-color:#02542d;border-radius:12px;color:#ffffff;display:inline-block;font-size:15px;font-weight:bold;line-height:48px;text-align:center;text-decoration:none;width:260px;-webkit-text-size-adjust:none;">Переглянути замовлення</a>
   <!--<![endif]-->
 </td></tr></table>
 {% endblock %}
