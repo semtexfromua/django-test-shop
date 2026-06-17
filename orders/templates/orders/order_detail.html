@@ -1,20 +1,59 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Замовлення #{{ order.pk }} | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Замовлення #{{ order.pk }}</h1>
-  <p>Статус: <strong>{{ order.get_status_display }}</strong></p>
-  <table class="cart-table">
-    <thead><tr><th>Товар</th><th>Ціна</th><th>К-сть</th><th>Сума</th></tr></thead>
-    <tbody>
-    {% for item in order.items.all %}
-      <tr><td>{{ item.product.name }}</td><td>${{ item.price }}</td><td>{{ item.quantity }}</td><td>${{ item.subtotal }}</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  <p class="cart-total"><strong>Разом: ${{ order.total_price }}</strong></p>
-  <h2>Доставка</h2>
-  <p>{{ order.full_name }}, {{ order.phone }}<br>{{ order.shipping_address }}</p>
-  <p><a href="{% url 'orders:list' %}">← Усі замовлення</a></p>
+<div class="container" style="padding-top:30px;padding-bottom:48px;">
+  <a href="{% url 'orders:list' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Усі замовлення</a>
+
+  <div class="order-detail__head">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <h1>Замовлення #{{ order.pk }}</h1>
+      <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+    <span style="font-size:14px;color:var(--hb-grey);">{{ order.created_at|date:"d.m.Y, H:i" }}</span>
+  </div>
+
+  {% if order.status == 'cancelled' %}
+  <div class="message message--error" style="margin:24px 0;"><i class="fa-solid fa-circle-xmark"></i> Це замовлення скасовано.</div>
+  {% else %}
+  <div class="timeline">
+    <div class="timeline__node done"><span class="timeline__dot"><i class="fa-solid fa-check"></i></span><label>Оформлено</label></div>
+    <span class="timeline__bar {% if order.status == 'paid' or order.status == 'shipped' or order.status == 'delivered' %}done{% endif %}"></span>
+    <div class="timeline__node {% if order.status == 'paid' or order.status == 'shipped' or order.status == 'delivered' %}done{% endif %}"><span class="timeline__dot"><i class="fa-solid fa-check"></i></span><label>Оплачено</label></div>
+    <span class="timeline__bar {% if order.status == 'shipped' or order.status == 'delivered' %}done{% endif %}"></span>
+    <div class="timeline__node {% if order.status == 'shipped' or order.status == 'delivered' %}done{% endif %}"><span class="timeline__dot"><i class="fa-solid fa-truck"></i></span><label>Відправлено</label></div>
+    <span class="timeline__bar {% if order.status == 'delivered' %}done{% endif %}"></span>
+    <div class="timeline__node {% if order.status == 'delivered' %}done{% endif %}"><span class="timeline__dot"><i class="fa-solid fa-box-open"></i></span><label>Доставлено</label></div>
+  </div>
+  {% endif %}
+
+  <div class="order-detail__grid">
+    <div class="order-items">
+      <div class="order-items__head"><span>Товар</span><span style="text-align:right;">Ціна</span><span style="text-align:center;">К-сть</span><span style="text-align:right;">Сума</span></div>
+      {% for item in order.items.all %}
+      <div class="order-items__row">
+        <div class="prod">
+          {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="">{% else %}<img src="{% static 'img/logo.svg' %}" alt="">{% endif %}
+          <span>{{ item.product.name }}</span>
+        </div>
+        <span style="text-align:right;font-size:14px;color:var(--hb-ink-soft);">${{ item.price }}</span>
+        <span style="text-align:center;font-size:14px;color:var(--hb-ink-soft);">{{ item.quantity }}</span>
+        <span style="text-align:right;font-size:14px;font-weight:600;">${{ item.subtotal }}</span>
+      </div>
+      {% endfor %}
+      <div class="order-items__total"><span>Разом</span><span>${{ order.total_price }}</span></div>
+    </div>
+
+    <aside style="display:flex;flex-direction:column;gap:16px;">
+      <div class="info-card">
+        <h3>Доставка</h3>
+        <div class="body"><strong>{{ order.full_name }}</strong><br><span>{{ order.phone }}</span><br><span>{{ order.shipping_address }}</span></div>
+      </div>
+      <div class="info-card">
+        <h3>Оплата</h3>
+        <div class="body" style="display:flex;align-items:center;gap:10px;"><i class="fa-regular fa-credit-card" style="color:var(--hb-green);"></i> {{ order.get_payment_method_display|default:"Картка онлайн" }}</div>
+      </div>
+    </aside>
+  </div>
 </div>
 {% endblock %}

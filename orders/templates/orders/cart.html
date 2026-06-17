@@ -1,38 +1,65 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Кошик | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Кошик</h1>
+<div class="container account-page" style="padding-top:36px;padding-bottom:48px;">
   {% if cart|length %}
-  <table class="cart-table">
-    <thead><tr><th>Товар</th><th>Ціна</th><th>К-сть</th><th>Сума</th><th></th></tr></thead>
-    <tbody>
-    {% for item in cart %}
-      <tr>
-        <td><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></td>
-        <td>${{ item.price }}</td>
-        <td>
-          <form method="post" action="{% url 'orders:cart_update' item.product.id %}">
+  <div class="cart-head">
+    <h1>Кошик</h1>
+    <span>{{ cart|length }} товар(ів)</span>
+  </div>
+  <div class="cart-layout">
+    <div class="cart-items">
+      {% for item in cart %}
+      <div class="cart-item">
+        <a href="{{ item.product.get_absolute_url }}" class="cart-item__media">
+          {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">{% else %}<img src="{% static 'img/logo.svg' %}" alt="">{% endif %}
+        </a>
+        <div>
+          <span class="cart-item__cat">{{ item.product.category.name }}</span>
+          <h4 class="cart-item__name"><a href="{{ item.product.get_absolute_url }}" style="text-decoration:none;color:inherit;">{{ item.product.name }}</a></h4>
+          <span class="cart-item__unit">${{ item.price }} за од.</span>
+        </div>
+        <div class="cart-item__controls">
+          <form method="post" action="{% url 'orders:cart_update' item.product.id %}" class="qty-stepper qty-stepper--sm">
             {% csrf_token %}
-            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="Input">
-            <button type="submit" class="button button--secondary">↻</button>
+            <button type="button" onclick="var i=this.nextElementSibling;i.value=Math.max(1,(+i.value||1)-1);this.closest('form').submit();">−</button>
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" onchange="this.closest('form').submit();">
+            <button type="button" onclick="var i=this.previousElementSibling;i.value=Math.min({{ item.product.stock }},(+i.value||1)+1);this.closest('form').submit();">+</button>
           </form>
-        </td>
-        <td>${{ item.subtotal }}</td>
-        <td>
+          <span class="cart-item__sub">${{ item.subtotal }}</span>
           <form method="post" action="{% url 'orders:cart_remove' item.product.id %}">
             {% csrf_token %}
-            <button type="submit" class="button button--secondary">×</button>
+            <button type="submit" class="icon-button button--danger" title="Видалити" style="width:38px;height:38px;"><i class="fa-regular fa-trash-can"></i></button>
           </form>
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  <p class="cart-total"><strong>Разом: ${{ cart.total }}</strong></p>
-  <a href="{% url 'orders:checkout' %}" class="button button--primary">Оформити замовлення</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <aside class="summary">
+      <h3>Підсумок</h3>
+      <div class="summary__rows">
+        <div class="summary__row"><span>Товари ({{ cart|length }})</span><strong>${{ cart.total }}</strong></div>
+        <div class="summary__row"><span>Доставка</span><span class="summary__free">Безкоштовно</span></div>
+        <div class="summary__row"><span>Знижка</span><strong>—</strong></div>
+      </div>
+      <div class="summary__promo">
+        <input type="text" placeholder="Промокод">
+        <button type="button" class="button button--secondary" style="height:42px;padding:0 16px;">OK</button>
+      </div>
+      <div class="summary__total"><span>Разом</span><span>${{ cart.total }}</span></div>
+      <a href="{% url 'orders:checkout' %}" class="button button--primary button--block">Оформити замовлення <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="{% url 'products:list' %}" class="summary__link">← Продовжити покупки</a>
+    </aside>
+  </div>
   {% else %}
-  <p>Кошик порожній. <a href="{% url 'products:list' %}">До каталогу</a></p>
+  <div class="empty-state">
+    <i class="fa-solid fa-bag-shopping"></i>
+    <h2>Кошик порожній</h2>
+    <p>Додайте інгредієнти з каталогу, щоб почати варити.</p>
+    <a href="{% url 'products:list' %}" class="button button--primary" style="display:inline-flex;">До каталогу</a>
+  </div>
   {% endif %}
 </div>
 {% endblock %}

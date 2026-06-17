@@ -1,26 +1,58 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Оформлення | Hop &amp; Barley{% endblock %}
 {% block content %}
-<div class="container account-page">
-  <h1>Оформлення замовлення</h1>
-  <div class="checkout-summary">
-    <h2>Ваше замовлення</h2>
-    <ul>
-      {% for item in cart %}<li>{{ item.product.name }} × {{ item.quantity }} — ${{ item.subtotal }}</li>{% endfor %}
-    </ul>
-    <p><strong>Разом: ${{ cart.total }}</strong></p>
+<div class="container" style="padding-bottom:48px;">
+  <div class="checkout-steps">
+    <div class="step done"><span><i class="fa-solid fa-check" style="font-size:11px;"></i></span><label>Кошик</label></div>
+    <span class="bar done"></span>
+    <div class="step active"><span>2</span><label>Доставка та оплата</label></div>
+    <span class="bar"></span>
+    <div class="step"><span>3</span><label>Готово</label></div>
   </div>
-  <form class="auth-form" method="post" onsubmit="if(this.dataset.sent)return false;this.dataset.sent=1;">
-    {# guard від подвійного кліку; повний concurrent-захист — idempotency-key (відкладено, див. AUDIT) #}
-    {% csrf_token %}
-    {% for field in form %}
-    <div class="InputField">
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-      {{ field }}
-      {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
-    </div>
-    {% endfor %}
-    <div class="ButtonGroup"><button type="submit" class="button button--primary">Підтвердити та оплатити</button></div>
-  </form>
+
+  <div class="checkout-layout">
+    <form class="checkout-form" method="post" onsubmit="if(this.dataset.sent)return false;this.dataset.sent=1;">
+      {# guard від подвійного кліку; повний concurrent-захист — idempotency-key (відкладено, див. AUDIT) #}
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="message message--error">{{ form.non_field_errors }}</div>{% endif %}
+      <section class="section-block">
+        <h3><i class="fa-regular fa-user"></i> Контактні дані та доставка</h3>
+        <div class="form-grid">
+          {% for field in form %}
+          <div class="field {% if field.name == 'shipping_address' or field.name == 'email' %}full{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small style="font-size:12px;color:var(--hb-grey);">{{ field.help_text }}</small>{% endif %}
+            {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      <button type="submit" class="button button--primary button--block" style="height:52px;"><i class="fa-solid fa-lock" style="font-size:14px;"></i> Підтвердити та оплатити</button>
+    </form>
+
+    <aside class="summary">
+      <h3>Ваше замовлення</h3>
+      <div class="checkout-summary__items">
+        {% for item in cart %}
+        <div class="mini-item">
+          <div class="mini-item__media">
+            {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="">{% else %}<img src="{% static 'img/logo.svg' %}" alt="">{% endif %}
+            <span class="mini-item__qty">{{ item.quantity }}</span>
+          </div>
+          <span class="mini-item__name">{{ item.product.name }}</span>
+          <span class="mini-item__price">${{ item.subtotal }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="summary__rows" style="border-top:1px solid var(--hb-line);padding-top:16px;">
+        <div class="summary__row"><span>Товари</span><strong>${{ cart.total }}</strong></div>
+        <div class="summary__row"><span>Доставка</span><span class="summary__free">Безкоштовно</span></div>
+      </div>
+      <div class="summary__total"><span>Разом</span><span>${{ cart.total }}</span></div>
+      <p class="checkout-disclaimer">Натискаючи кнопку, ви погоджуєтесь з умовами продажу та політикою конфіденційності.</p>
+    </aside>
+  </div>
 </div>
 {% endblock %}
