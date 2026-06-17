@@ -30,6 +30,7 @@
 - [Локальна розробка](#локальна-розробка)
 - [REST API та JWT](#rest-api-та-jwt)
 - [GraphQL (бонус)](#graphql-бонус)
+- [Email-сповіщення](#email-сповіщення)
 - [Тести та якість коду](#тести-та-якість-коду)
 - [Структура проєкту](#структура-проєкту)
 - [Чек-ліст реалізації](#чек-ліст-реалізації)
@@ -187,6 +188,23 @@ curl -X POST localhost:8000/api/users/refresh/ \
   orderCount
   topProducts(limit: 5) { name sold }
 }
+```
+
+## Email-сповіщення
+
+При оформленні (після коміту транзакції) магазин шле два листи: підтвердження
+замовлення покупцю та сповіщення «нове замовлення» адмінам сайту (`ADMINS`).
+Бекенд за замовчуванням — **console** (листи друкуються в лог). Щоб слати реальні
+листи, задай SMTP-бекенд і креди через env — напр. пісочниця **Mailtrap**, що
+ловить пошту у веб-інбоксі (безпечно, без ризику спаму):
+
+```bash
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=sandbox.smtp.mailtrap.io
+EMAIL_PORT=2525
+EMAIL_HOST_USER=<твій-mailtrap-user>
+EMAIL_HOST_PASSWORD=<твій-mailtrap-password>
+EMAIL_USE_TLS=True
 ```
 
 ## Тести та якість коду

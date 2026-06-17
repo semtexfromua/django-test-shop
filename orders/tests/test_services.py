@@ -3,6 +3,7 @@ from typing import Any, cast
 
 import pytest
 from django.core import mail
+from django.test import override_settings
 
 from orders.models import Order, OrderItem
 from orders.services import InsufficientStock, OrderContact, create_order
@@ -54,12 +55,32 @@ def test_create_order_overselling_rolls_back() -> None:
 
 
 @pytest.mark.django_db
-def test_create_order_sends_email(django_capture_on_commit_callbacks: Any) -> None:
+@override_settings(ADMINS=[("Admin", "admin@shop.test")], DEFAULT_FROM_EMAIL="shop@shop.test")
+def test_create_order_emails_customer_and_admin(django_capture_on_commit_callbacks: Any) -> None:
+    user = cast(User, UserFactory())
+    p = cast(Product, ProductFactory(price=Decimal("10.00"), stock=5))
+    with django_capture_on_commit_callbacks(execute=True):
+        order = create_order(user, [(p, 2)], CONTACT)
+    assert len(mail.outbox) == 2
+    customer, admin = mail.outbox
+    assert customer.to == [CONTACT.email]
+    assert customer.from_email == "shop@shop.test"
+    assert f"#{order.pk}" in customer.subject
+    assert f"#{order.pk}" in customer.body and "20.00" in customer.body
+    assert admin.to == ["admin@shop.test"]
+    assert f"#{order.pk}" in admin.subject
+    assert CONTACT.email in admin.body
+
+
+@pytest.mark.django_db
+@override_settings(ADMINS=[])
+def test_order_email_skipped_without_admins(django_capture_on_commit_callbacks: Any) -> None:
     user = cast(User, UserFactory())
     p = cast(Product, ProductFactory(price=Decimal("10.00"), stock=5))
     with django_capture_on_commit_callbacks(execute=True):
         create_order(user, [(p, 1)], CONTACT)
-    assert len(mail.outbox) >= 1
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == [CONTACT.email]
 
 
 @pytest.mark.django_db
