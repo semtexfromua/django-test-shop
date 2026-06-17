@@ -286,7 +286,7 @@ Dependencies are acyclic: `users, products → orders → payments`; `reviews �
 - [x] Admin: analytics, filters, custom actions, role setup
 - [x] Type hints + docstrings · `ruff`/`mypy` clean · tests (coverage ≥ 80%, ~95%)
 - [x] Meaningful commits · `feature/* → develop → main` branching
-- [x] **Bonus:** GraphQL analytics · GitHub Actions CI · `uv` dependency manager
+- [x] **Bonus:** GraphQL analytics · async email delivery (Celery + Redis, auto-retry) · integrated UI redesign · GitHub Actions CI · `uv` dependency manager
 
 ## License
 
