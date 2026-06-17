@@ -5,9 +5,11 @@ from typing import cast
 from unittest import mock
 
 import pytest
+from django.contrib.admin.sites import AdminSite
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives
-from django.test import override_settings
+from django.test import RequestFactory, override_settings
 
 from orders.models import Order, OrderItem
 from orders.tasks import send_order_email
@@ -67,3 +69,16 @@ def test_send_order_email_failure_is_not_swallowed() -> None:
     ):
         send_order_email(order.pk, "customer")
     assert mail.outbox == []
+
+
+@pytest.mark.django_db
+@override_settings(ADMINS=[("Admin", "admin@shop.test")], DEFAULT_FROM_EMAIL="shop@shop.test")
+def test_admin_resend_action_sends_both() -> None:
+    from orders.admin import OrderAdmin
+
+    order = _order(cast(User, UserFactory()))
+    req = RequestFactory().post("/admin/")
+    setattr(req, "session", {})  # noqa: B010 — minimal request plumbing for message_user
+    setattr(req, "_messages", FallbackStorage(req))  # noqa: B010
+    OrderAdmin(Order, AdminSite()).resend_emails(req, Order.objects.filter(pk=order.pk))
+    assert len(mail.outbox) == 2  # customer + admin (eager)
