@@ -8,6 +8,9 @@
 ![Python](https://img.shields.io/badge/python-3.13-blue)
 ![Django](https://img.shields.io/badge/Django-5.2-092E20)
 ![DRF](https://img.shields.io/badge/DRF-3.17-A30000)
+![Celery](https://img.shields.io/badge/Celery-5.6-37814A)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
 ![Ruff](https://img.shields.io/badge/lint-ruff-261230)
 ![mypy](https://img.shields.io/badge/types-mypy-2A6DB2)
@@ -37,6 +40,9 @@
 - [Ліцензія](#ліцензія)
 
 ## Огляд
+
+> [!NOTE]
+> **Навчальний проєкт.** Зроблений, щоб попрактикувати й показати продакшен-рівневий Django / DRF від і до — не комерційний сервіс. Оплата **імітована**, каталог — **демо-дані з сидера**, а розділи *Гайди* / *Спільнота* — **статичні демо-сторінки**.
 
 **Hop & Barley** перетворює статичний HTML/CSS-шаблон на робочий інтернет-магазин інгредієнтів для
 пивоваріння (хміль, солод, дріжджі, набори). Це навчальний проєкт, що демонструє ідіоматичний Django,
