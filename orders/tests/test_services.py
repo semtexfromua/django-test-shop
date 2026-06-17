@@ -58,7 +58,7 @@ def test_create_order_overselling_rolls_back() -> None:
 @override_settings(ADMINS=[("Admin", "admin@shop.test")], DEFAULT_FROM_EMAIL="shop@shop.test")
 def test_create_order_emails_customer_and_admin(django_capture_on_commit_callbacks: Any) -> None:
     user = cast(User, UserFactory())
-    p = cast(Product, ProductFactory(price=Decimal("10.00"), stock=5))
+    p = cast(Product, ProductFactory(price=Decimal("10.00"), stock=50))
     with django_capture_on_commit_callbacks(execute=True):
         order = create_order(user, [(p, 2)], CONTACT)
     assert len(mail.outbox) == 2
@@ -70,13 +70,16 @@ def test_create_order_emails_customer_and_admin(django_capture_on_commit_callbac
     assert admin.to == ["admin@shop.test"]
     assert f"#{order.pk}" in admin.subject
     assert CONTACT.email in admin.body
+    assert "50→48" in admin.body  # stock change (before→after) — admin only
     # HTML alternative: items, total and an absolute link to the order / admin page
     customer_html = cast(Any, customer).alternatives[0]
     assert customer_html[1] == "text/html"
     assert p.name in customer_html[0] and f"/orders/{order.pk}/" in customer_html[0]
+    assert "Склад" not in customer_html[0]  # stock shown only to the admin
     admin_html = cast(Any, admin).alternatives[0]
     assert CONTACT.email in admin_html[0]
     assert f"/admin/orders/order/{order.pk}/change/" in admin_html[0]
+    assert "Склад" in admin_html[0]
 
 
 @pytest.mark.django_db
