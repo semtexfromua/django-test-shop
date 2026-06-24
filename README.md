@@ -15,6 +15,9 @@
 ![Ruff](https://img.shields.io/badge/lint-ruff-261230)
 ![mypy](https://img.shields.io/badge/types-mypy-2A6DB2)
 
+### 🔗 [Live demo](https://django-test-shop.onrender.com)
+<sub>Free hosting — first load may take ~40s to wake.</sub>
+
 **English** · [Українська](README.uk.md)
 
 <img src="docs/screenshots/catalog.jpg" alt="Hop & Barley catalog" width="80%">
