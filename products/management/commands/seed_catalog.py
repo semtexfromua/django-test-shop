@@ -52,9 +52,12 @@ class Command(BaseCommand):
                     "description": f"{name} — демо-товар.",
                 },
             )
-            # attach the image only if it isn't set yet (idempotent)
+            # Re-attach the image if its media file is missing.
+            # Render's free tier has an ephemeral disk — media is wiped on every
+            # redeploy/wake, so we restore it from the persistent static/ source.
             src = img_dir / image
-            if not product.image and src.exists():
+            media_missing = not product.image or not product.image.storage.exists(product.image.name)
+            if src.exists() and media_missing:
                 with src.open("rb") as fh:
                     product.image.save(image, File(fh), save=True)
         self.stdout.write(self.style.SUCCESS("Catalog populated."))
